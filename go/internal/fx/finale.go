@@ -285,8 +285,11 @@ func (f *Finale) Draw(fb *canvas.FB, y0, y1 int) {
 	// --- logo ---
 	scale := f.logoScale
 	offs := f.offs
+	// the letters bounce off the floor line: offsets run from -scale/3 (up)
+	// to 0 (resting on it), never below, so no letter sinks into its own
+	// reflection
 	for i := range offs {
-		offs[i] = int(math.Sin(f.t*2.4+float64(i)*0.75)) * scale / 3
+		offs[i] = int((math.Sin(f.t*2.4+float64(i)*0.75) - 1) * float64(scale) / 6)
 	}
 
 	const (
@@ -299,7 +302,7 @@ func (f *Finale) Draw(fb *canvas.FB, y0, y1 int) {
 	fb.DrawTextReflect(f.logoX, f.floorY, brand.Lang, scale, topCol, botCol, offs, 125, f.reflH)
 
 	// a one-pixel dark edge keeps the letters off the background
-	fb.DrawTextOutline(f.logoX, f.logoY, brand.Lang, scale, 0xFF200A18)
+	fb.DrawTextOutline(f.logoX, f.logoY, brand.Lang, scale, 0xFF200A18, offs)
 	fb.DrawTextGradient(f.logoX, f.logoY, brand.Lang, scale, topCol, midCol, botCol, offs, true)
 
 	// --- subtitle with rules either side ---

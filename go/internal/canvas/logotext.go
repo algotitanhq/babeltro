@@ -1,5 +1,7 @@
 package canvas
 
+import "unicode/utf8"
+
 // clipBlock returns the visible part of a scale×scale glyph block at (px, py)
 // as a row range and a half-open column range. Clipping once per block and
 // then writing straight runs is much cheaper than testing bounds per pixel.
@@ -101,10 +103,22 @@ func (fb *FB) DrawTextGradient(x, y int, s string, scale int, top, mid, bottom u
 
 // DrawTextOutline draws s offset by one pixel in the four cardinal directions
 // in the given colour, producing a hard edge. Used to keep the logo readable
-// over a busy background.
-func (fb *FB) DrawTextOutline(x, y int, s string, scale int, c uint32) {
-	for _, d := range [4][2]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}} {
-		fb.DrawText(x+d[0], y+d[1], s, scale, c)
+// over a busy background. offs are the same per-glyph baseline offsets as
+// DrawTextGradient's, so the edge follows the letters when they wave.
+func (fb *FB) DrawTextOutline(x, y int, s string, scale int, c uint32, offs []int) {
+	i := 0
+	for at, ch := range s {
+		dy := 0
+		if i < len(offs) {
+			dy = offs[i]
+		}
+		// slicing the string keeps this allocation-free
+		g := s[at : at+utf8.RuneLen(ch)]
+		gx := x + i*(fontWidth+fontGap)*scale
+		for _, d := range [4][2]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}} {
+			fb.DrawText(gx+d[0], y+dy+d[1], g, scale, c)
+		}
+		i++
 	}
 }
 
@@ -137,8 +151,9 @@ func (fb *FB) DrawTextReflect(x, y int, s string, scale int, top, bottom uint32,
 				if bits == 0 {
 					continue
 				}
-				// mirrored: glyph row 0 sits at the far end
-				py := y + (6-row)*scale + dy
+				// mirrored: glyph row 0 sits at the far end, and a letter
+				// lifted by dy has its reflection pushed down by as much
+				py := y + (6-row)*scale - dy
 				for col := 0; col < 5; col++ {
 					if bits&(1<<(4-col)) == 0 {
 						continue
