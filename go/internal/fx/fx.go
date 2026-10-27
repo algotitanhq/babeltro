@@ -8,7 +8,7 @@
 // whole.
 package fx
 
-import "rosette/internal/canvas"
+import "babeltro/internal/canvas"
 
 // State is what an effect knows about time.
 type State struct {

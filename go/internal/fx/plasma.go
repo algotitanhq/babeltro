@@ -1,9 +1,9 @@
 package fx
 
 import (
-	"rosette/internal/canvas"
-	"rosette/internal/fmath"
-	"rosette/internal/palette"
+	"babeltro/internal/canvas"
+	"babeltro/internal/fmath"
+	"babeltro/internal/palette"
 )
 
 // Plasma is four summed sine fields, the oldest trick in the demoscene book.

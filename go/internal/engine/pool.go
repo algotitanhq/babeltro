@@ -1,8 +1,8 @@
 package engine
 
 import (
-	"rosette/internal/canvas"
-	"rosette/internal/fx"
+	"babeltro/internal/canvas"
+	"babeltro/internal/fx"
 )
 
 // bandPool keeps N goroutines parked between frames. Rendering a frame means

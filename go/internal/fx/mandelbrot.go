@@ -3,8 +3,8 @@ package fx
 import (
 	"math"
 
-	"rosette/internal/canvas"
-	"rosette/internal/palette"
+	"babeltro/internal/canvas"
+	"babeltro/internal/palette"
 )
 
 // Mandelbrot dives into the boundary forever. It is the most expensive scene

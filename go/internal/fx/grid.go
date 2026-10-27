@@ -1,8 +1,8 @@
 package fx
 
 import (
-	"rosette/internal/canvas"
-	"rosette/internal/fmath"
+	"babeltro/internal/canvas"
+	"babeltro/internal/fmath"
 )
 
 // Grid is the synthwave staple: an infinite checker floor rushing at the

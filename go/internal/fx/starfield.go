@@ -4,7 +4,7 @@ import (
 	"math"
 	"math/rand"
 
-	"rosette/internal/canvas"
+	"babeltro/internal/canvas"
 )
 
 // Starfield is a warp-speed star tunnel: stars live in 3D, get projected in

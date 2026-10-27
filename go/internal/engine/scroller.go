@@ -3,7 +3,7 @@ package engine
 import (
 	"math"
 
-	"rosette/internal/canvas"
+	"babeltro/internal/canvas"
 )
 
 // Scroller is the sine-wave text banner that runs along the bottom. It exists

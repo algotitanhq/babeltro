@@ -1,9 +1,9 @@
 package fx
 
 import (
-	"rosette/internal/canvas"
-	"rosette/internal/fmath"
-	"rosette/internal/palette"
+	"babeltro/internal/canvas"
+	"babeltro/internal/fmath"
+	"babeltro/internal/palette"
 )
 
 // Tunnel maps every pixel to polar coordinates once, at resize time. After

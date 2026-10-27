@@ -3,9 +3,9 @@ package fx
 import (
 	"math"
 
-	"rosette/internal/canvas"
-	"rosette/internal/fmath"
-	"rosette/internal/palette"
+	"babeltro/internal/canvas"
+	"babeltro/internal/fmath"
+	"babeltro/internal/palette"
 )
 
 // Rotozoom is the purest demoscene move: build a texture once, then every

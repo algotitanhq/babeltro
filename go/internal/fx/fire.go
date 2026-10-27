@@ -1,9 +1,9 @@
 package fx
 
 import (
-	"rosette/internal/canvas"
-	"rosette/internal/fmath"
-	"rosette/internal/palette"
+	"babeltro/internal/canvas"
+	"babeltro/internal/fmath"
+	"babeltro/internal/palette"
 )
 
 // Fire is the Doom fire algorithm: a heat buffer that is seeded at the bottom

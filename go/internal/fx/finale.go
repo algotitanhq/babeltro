@@ -4,8 +4,9 @@ import (
 	"math"
 	"math/rand"
 
-	"rosette/internal/canvas"
-	"rosette/internal/hud"
+	"babeltro/internal/brand"
+	"babeltro/internal/canvas"
+	"babeltro/internal/hud"
 )
 
 // starBg is a fixed background star in normalised coordinates; the finale
@@ -94,11 +95,11 @@ func (f *Finale) Resize(w, h int) {
 	if f.logoScale < 3 {
 		f.logoScale = 3
 	}
-	f.logoW = canvas.TextWidth("GOOSE", f.logoScale)
+	f.logoW = canvas.TextWidth(brand.Lang, f.logoScale)
 	f.textH = canvas.TextHeight(f.logoScale)
 	f.logoX = (w - f.logoW) / 2
 
-	f.sub = "EVERY PIXEL IS GO"
+	f.sub = "EVERY PIXEL IS " + brand.Lang
 	f.subScale = w / 300
 	if f.subScale < 1 {
 		f.subScale = 1
@@ -131,7 +132,7 @@ func (f *Finale) Resize(w, h int) {
 	if f.logoScale < 3 {
 		f.logoScale = 3
 	}
-	f.logoW = canvas.TextWidth("GOOSE", f.logoScale)
+	f.logoW = canvas.TextWidth(brand.Lang, f.logoScale)
 	f.textH = canvas.TextHeight(f.logoScale)
 	f.logoX = (w - f.logoW) / 2
 
@@ -302,11 +303,11 @@ func (f *Finale) Draw(fb *canvas.FB, y0, y1 int) {
 	)
 
 	// reflection first, so the wordmark sits on top of its own light
-	fb.DrawTextReflect(f.logoX, f.floorY, "GOOSE", scale, topCol, botCol, offs, 125)
+	fb.DrawTextReflect(f.logoX, f.floorY, brand.Lang, scale, topCol, botCol, offs, 125)
 
 	// a one-pixel dark edge keeps the letters off the background
-	fb.DrawTextOutline(f.logoX, f.logoY, "GOOSE", scale, 0xFF200A18)
-	fb.DrawTextGradient(f.logoX, f.logoY, "GOOSE", scale, topCol, midCol, botCol, offs, true)
+	fb.DrawTextOutline(f.logoX, f.logoY, brand.Lang, scale, 0xFF200A18)
+	fb.DrawTextGradient(f.logoX, f.logoY, brand.Lang, scale, topCol, midCol, botCol, offs, true)
 
 	// --- subtitle with rules either side ---
 	subW := canvas.TextWidth(f.sub, f.subScale)

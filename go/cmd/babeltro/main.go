@@ -1,4 +1,4 @@
-// Command goose runs the demo: a software-rendered demoscene piece whose
+// Command babeltro runs the demo: a software-rendered demoscene piece whose
 // subject is the speed of the language it is written in.
 package main
 
@@ -13,11 +13,12 @@ import (
 	"time"
 	"unsafe"
 
-	"rosette/internal/canvas"
-	"rosette/internal/engine"
-	"rosette/internal/fx"
-	"rosette/internal/glc"
-	"rosette/internal/glfwc"
+	"babeltro/internal/brand"
+	"babeltro/internal/canvas"
+	"babeltro/internal/engine"
+	"babeltro/internal/fx"
+	"babeltro/internal/glc"
+	"babeltro/internal/glfwc"
 )
 
 func main() {
@@ -66,7 +67,7 @@ func main() {
 	glfwc.WindowHint(glfwc.Visible, 1)
 	glfwc.WindowHint(glfwc.Resizable, 1)
 
-	win, err := glfwc.CreateWindow(*wFlag, *hFlag, "GOOSE — every pixel is Go")
+	win, err := glfwc.CreateWindow(*wFlag, *hFlag, brand.Project+" — every pixel is "+brand.Lang)
 	if err != nil {
 		fail(err)
 	}
@@ -98,7 +99,7 @@ func main() {
 		glfwc.SetFullscreen(win, true, *wFlag, *hFlag)
 	}
 
-	fmt.Printf("goose: %dx%d, %d workers, budget %.2f ms (%d Hz)\n",
+	fmt.Printf("babeltro: %dx%d, %d workers, budget %.2f ms (%d Hz)\n",
 		fbw, fbh, eng.Workers(), budget, refresh)
 	fmt.Println("keys: ESC quit · H hud · S next scene · F fullscreen")
 
@@ -201,7 +202,7 @@ func runBench(w, h, workers, frames int) {
 	eng := engine.New(fb, buildScenes(), workers, 16.67)
 	res := eng.Bench(frames)
 
-	fmt.Printf("goose bench \u2014 %dx%d, %d workers, %d frames each\n\n", w, h, workers, frames)
+	fmt.Printf("babeltro bench \u2014 %dx%d, %d workers, %d frames each\n\n", w, h, workers, frames)
 	fmt.Printf("%-12s %10s %10s %12s %8s\n", "SCENE", "MEDIAN", "BEST", "MEGAPIX/S", "FRAMES")
 	fmt.Printf("%-12s %10s %10s %12s %8s\n", "", "ms", "ms", "", "")
 	var total float64
@@ -261,6 +262,6 @@ func writePNG(path string, fb *canvas.FB) error {
 }
 
 func fail(err error) {
-	fmt.Fprintln(os.Stderr, "goose:", err)
+	fmt.Fprintln(os.Stderr, "babeltro:", err)
 	os.Exit(1)
 }

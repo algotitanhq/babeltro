@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"rosette/internal/fx"
+	"babeltro/internal/fx"
 )
 
 // BenchResult is one effect's measured cost per frame.

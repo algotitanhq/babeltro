@@ -3,8 +3,8 @@ package engine
 import (
 	"strconv"
 
-	"rosette/internal/canvas"
-	"rosette/internal/hud"
+	"babeltro/internal/canvas"
+	"babeltro/internal/hud"
 )
 
 // drawSceneTitle puts the scene name on screen for the first few seconds,

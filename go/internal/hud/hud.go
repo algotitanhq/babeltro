@@ -14,7 +14,8 @@ import (
 	"strconv"
 	"unsafe"
 
-	"rosette/internal/canvas"
+	"babeltro/internal/brand"
+	"babeltro/internal/canvas"
 )
 
 var (
@@ -240,9 +241,9 @@ func (h *HUD) Draw(fb *canvas.FB, s Stats) {
 	timeB = append(timeB, 's')
 
 	const (
-		title = "GOOSE"
+		title = brand.Project
 		sub   = "// SOFTWARE RENDERER"
-		mark  = "PURE GO"
+		mark  = "PURE " + brand.Lang
 		hint  = "ESC QUIT  H HUD  S NEXT  F FULL"
 	)
 

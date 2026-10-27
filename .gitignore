@@ -1,5 +1,5 @@
 # binaires compilés
-/go/goose
+/go/babeltro
 /goose/plasma
 *.ppm
 .DS_Store

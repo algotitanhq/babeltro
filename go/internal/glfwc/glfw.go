@@ -12,14 +12,14 @@ package glfwc
 #include <GLFW/glfw3.h>
 
 // Defined in activate.m (Objective-C lives in its own translation unit).
-void goose_activate(void);
+void babeltro_activate(void);
 
-static int goose_get_window_size(GLFWwindow *w, int *cw, int *ch) {
+static int babeltro_get_window_size(GLFWwindow *w, int *cw, int *ch) {
 	glfwGetWindowSize(w, cw, ch);
 	return 0;
 }
 
-static void goose_fullscreen(GLFWwindow *w, int on, int ww, int wh) {
+static void babeltro_fullscreen(GLFWwindow *w, int on, int ww, int wh) {
 	if (on) {
 		GLFWmonitor *m = glfwGetPrimaryMonitor();
 		const GLFWvidmode *vm = glfwGetVideoMode(m);
@@ -126,7 +126,7 @@ func FramebufferSize(w *C.GLFWwindow) (int, int) {
 // WindowSize returns the window size in screen coordinates.
 func WindowSize(w *C.GLFWwindow) (int, int) {
 	var ww, wh C.int
-	C.goose_get_window_size(w, &ww, &wh)
+	C.babeltro_get_window_size(w, &ww, &wh)
 	return int(ww), int(wh)
 }
 
@@ -165,7 +165,7 @@ func ShowWindow(w *C.GLFWwindow) { C.glfwShowWindow(w) }
 func FocusWindow(w *C.GLFWwindow) {
 	C.glfwShowWindow(w)
 	C.glfwFocusWindow(w)
-	C.goose_activate()
+	C.babeltro_activate()
 }
 
 func SetWindowPos(w *C.GLFWwindow, x, y int) {
@@ -194,7 +194,7 @@ func SetFullscreen(w *C.GLFWwindow, on bool, ww, wh int) {
 	if on {
 		cv = 1
 	}
-	C.goose_fullscreen(w, cv, C.int(ww), C.int(wh))
+	C.babeltro_fullscreen(w, cv, C.int(ww), C.int(wh))
 }
 
 func SetWindowSizeLimits(w *C.GLFWwindow, minw, minh, maxw, maxh int) {

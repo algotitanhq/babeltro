@@ -1,4 +1,4 @@
-# goose
+# babeltro — portage Go (référence)
 
 Une démo demoscene entièrement calculée par le CPU, écrite en Go.
 
@@ -15,13 +15,13 @@ de 16,67 ms d'un écran 60 Hz.
 ## Lancer
 
 ```sh
-go build -o goose ./cmd/goose
-./goose                # 1280x720, 8 goroutines
-./goose -fs            # plein écran
-./goose -w 1920 -h 1080
+go build -o babeltro ./cmd/babeltro
+./babeltro                # 1280x720, 8 goroutines
+./babeltro -fs            # plein écran
+./babeltro -w 1920 -h 1080
 ```
 
-`go run ./cmd/goose` marche aussi, mais un binaire compilé démarre plus vite.
+`go run ./cmd/babeltro` marche aussi, mais un binaire compilé démarre plus vite.
 
 | Touche | Effet |
 | --- | --- |
@@ -35,12 +35,12 @@ go build -o goose ./cmd/goose
 Autres modes :
 
 ```sh
-./goose -list                        # les scènes et leurs durées
-./goose -bench -w 1280 -h 720        # coût mesuré de chaque effet
-./goose -dump /tmp/shots -at 5       # rendu PNG sans fenêtre (itération visuelle)
-./goose -scene 4                     # démarrer à une scène donnée
-./goose -stats                       # mesures en direct sur stdout, une par seconde
-./goose -stats -dur 30               # idem, et quitte au bout de 30 s
+./babeltro -list                        # les scènes et leurs durées
+./babeltro -bench -w 1280 -h 720        # coût mesuré de chaque effet
+./babeltro -dump /tmp/shots -at 5       # rendu PNG sans fenêtre (itération visuelle)
+./babeltro -scene 4                     # démarrer à une scène donnée
+./babeltro -stats                       # mesures en direct sur stdout, une par seconde
+./babeltro -stats -dur 30               # idem, et quitte au bout de 30 s
 ```
 
 Sur un écran Retina, la fenêtre de 1280×720 couvre 2560×1440 pixels physiques :
@@ -95,7 +95,7 @@ mesure : elle choisit ce qu'elle calcule.
 
 ## Les chiffres
 
-Mesurés par `./goose -bench` (240 images par effet, les 24 premières écartées),
+Mesurés par `./babeltro -bench` (240 images par effet, les 24 premières écartées),
 sur un M1 8 cœurs :
 
 **1280×720 (0,92 Mpx)**
@@ -136,7 +136,7 @@ chaque pixel dans une goroutine.
 ## Organisation
 
 ```
-cmd/goose/          main : fenêtre, boucle, drapeaux, mode -dump, mode -bench
+cmd/babeltro/       main : fenêtre, boucle, drapeaux, mode -dump, mode -bench
 internal/glfwc/     liaison GLFW + activation de l'app (Objective-C)
 internal/glc/       liaison OpenGL 2.1 : un seul quad texturé
 internal/canvas/    framebuffer, primitives, police bitmap 5×7

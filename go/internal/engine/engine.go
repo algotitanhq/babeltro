@@ -6,9 +6,10 @@ import (
 	"runtime"
 	"time"
 
-	"rosette/internal/canvas"
-	"rosette/internal/fx"
-	"rosette/internal/hud"
+	"babeltro/internal/brand"
+	"babeltro/internal/canvas"
+	"babeltro/internal/fx"
+	"babeltro/internal/hud"
 )
 
 // Scene is one entry in the timeline.
@@ -242,10 +243,10 @@ func (e *Engine) sampleAllocs(t float64) {
 	e.sampled = true
 }
 
-const scrollerText = "GOOSE PRESENTS ... EVERY PIXEL IS GO ... NO SHADERS, NO GAME ENGINE, " +
+const scrollerText = brand.Project + " PRESENTS ... EVERY PIXEL IS " + brand.Lang + " ... NO SHADERS, NO GAME ENGINE, " +
 	"NO GPU WORK BEYOND THE FINAL BLIT ... 921,600 PIXELS PER FRAME COMPUTED ON THE CPU " +
 	"AND HANDED TO EIGHT GOROUTINES ... GREETINGS TO EVERYONE WHO EVER WROTE A PLASMA " +
-	"IN A LANGUAGE THAT DID NOT NEED A VIRTUAL MACHINE ... THIS IS GO AT FULL SPEED ... "
+	"IN A LANGUAGE THAT DID NOT NEED A VIRTUAL MACHINE ... THIS IS " + brand.Lang + " AT FULL SPEED ... "
 
 // FPS reports the last frame's rate.
 func (e *Engine) FPS() float64 { return e.fps }
