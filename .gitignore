@@ -1,0 +1,5 @@
+# binaires compilés
+/go/goose
+/goose/plasma
+*.ppm
+.DS_Store
