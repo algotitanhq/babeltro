@@ -109,16 +109,19 @@ func (fb *FB) DrawTextOutline(x, y int, s string, scale int, c uint32) {
 }
 
 // DrawTextReflect draws a vertically mirrored copy of s starting at y, which
-// is meant to be the line the reflection sits on. The copy fades out with
-// distance from that line and is added to the framebuffer rather than drawn
-// over it, so it looks like light on a polished floor.
-func (fb *FB) DrawTextReflect(x, y int, s string, scale int, top, bottom uint32, offs []int, strength uint8) {
+// is meant to be the line the reflection sits on. The copy fades out over
+// depth rows from that line and is added to the framebuffer rather than drawn
+// over it, so it looks like light on a polished floor. A depth shorter than
+// the glyph height cuts the reflection off where it has faded.
+func (fb *FB) DrawTextReflect(x, y int, s string, scale int, top, bottom uint32, offs []int, strength uint8, depth int) {
 	if scale < 1 {
 		scale = 1
 	}
+	if depth < 1 {
+		depth = 1
+	}
 	tr, tg, tb := top&0xFF, top>>8&0xFF, top>>16&0xFF
 	br, bg, bb := bottom&0xFF, bottom>>8&0xFF, bottom>>16&0xFF
-	totalH := 7 * scale
 
 	cx := x
 	i := 0
@@ -146,7 +149,7 @@ func (fb *FB) DrawTextReflect(x, y int, s string, scale int, top, bottom uint32,
 						continue
 					}
 					for yy := cy0; yy < cy1; yy++ {
-						d := float32(yy-y) / float32(totalH)
+						d := float32(yy-y) / float32(depth)
 						if d > 1 {
 							continue
 						}

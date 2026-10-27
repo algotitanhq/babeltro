@@ -1,25 +1,25 @@
 # babeltro
 
-Une intro demoscene calculée pixel par pixel sur le CPU, puis réécrite dans
-plusieurs langages. Babel pour les langues, « tro » pour l'intro : chaque
-langage refait la même prod.
+A demoscene intro computed pixel by pixel on the CPU, then rewritten in
+several languages. Babel for the languages, "-tro" for the intro: every
+language remakes the same production.
 
-Le but n'est pas de savoir quel langage gagne. C'est de voir ce que chaque
-langage oblige à écrire différemment pour produire **la même image** :
-modèle de mémoire, parallélisme, arithmétique flottante, contrôles de bornes,
-liaisons avec le système.
+The point is not to find out which language wins. It is to see what each
+language makes you write differently to produce **the same image**: memory
+model, parallelism, floating-point arithmetic, bounds checks, bindings to the
+system.
 
-## Règle du jeu
+## Rules
 
-Chaque portage doit rendre, au même instant, la même image que la référence
-Go, à l'octet près. La seule différence voulue : le nom du langage, que la
-démo affiche dans son logo, son texte défilant et son HUD
-(`go/internal/brand`). Les autres écarts sont mesurés et expliqués, jamais
-ignorés.
+Every port must render, at the same instant, the same image as the Go
+reference, byte for byte. The only intended difference is the language's own
+words — its name in the logo, the scroller and the HUD, and what it calls its
+workers (`go/internal/brand`). Any other difference is measured and
+explained, never ignored.
 
-## Portages
+## Ports
 
-| Dossier | Langage | État |
+| Directory | Language | Status |
 | --- | --- | --- |
-| `go/` | Go | référence : neuf scènes, fenêtre, HUD, `-bench`, `-dump` |
-| `goose/` | Goose | banc d'essai : la scène PLASMA seule (voir `goose/RESULTS.md`) |
+| `go/` | Go | reference: nine scenes, window, HUD, `-bench`, `-dump` |
+| `goose/` | Goose | test bench: the PLASMA scene only (see `goose/RESULTS.md`) |

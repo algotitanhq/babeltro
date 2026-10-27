@@ -31,6 +31,7 @@ type Finale struct {
 	logoY     int
 	logoW     int
 	textH     int
+	reflH     int // rows the reflection fades over, below the floor line
 
 	floorY int
 
@@ -60,7 +61,7 @@ type Finale struct {
 }
 
 func NewFinale() *Finale {
-	f := &Finale{offs: make([]int, 5)}
+	f := &Finale{offs: make([]int, len(brand.Lang))}
 	f.lines = [3]string{"0 GPU SHADERS", "0 EXTERNAL MODULES", "0 ASSETS ON DISK"}
 	return f
 }
@@ -86,19 +87,6 @@ func (f *Finale) Resize(w, h int) {
 		}
 	}
 
-	// The HUD panel covers the top-left corner, up to about 0.40 of the frame
-	// height once it is scaled. The card therefore starts below that and uses
-	// every line of the space that is left, keeping clear of the scroller at
-	// the bottom. Everything is a fraction of h so the clearance holds at any
-	// framebuffer size.
-	f.logoScale = w / 80
-	if f.logoScale < 3 {
-		f.logoScale = 3
-	}
-	f.logoW = canvas.TextWidth(brand.Lang, f.logoScale)
-	f.textH = canvas.TextHeight(f.logoScale)
-	f.logoX = (w - f.logoW) / 2
-
 	f.sub = "EVERY PIXEL IS " + brand.Lang
 	f.subScale = w / 300
 	if f.subScale < 1 {
@@ -112,7 +100,7 @@ func (f *Finale) Resize(w, h int) {
 	}
 	f.statGap = canvas.TextHeight(f.statsScale) * 3 / 2
 
-	f.tag = "60 FPS - ONE CPU - 8 GOROUTINES"
+	f.tag = "60 FPS - ONE CPU - 8 " + brand.Workers
 	f.tagScale = f.statsScale + 1
 	tagH := canvas.TextHeight(f.tagScale)
 
@@ -124,9 +112,13 @@ func (f *Finale) Resize(w, h int) {
 	top := hud.PanelBottom(w, h) + h/40
 	bottom := int(float32(h) * 0.90)
 	fixed := subH + 3*f.statGap + tagH + 4*gap // everything but the wordmark
-	// the wordmark is textH tall, and the reflection repeats it
-	f.logoScale = (bottom - top - fixed) / 14
-	if lim := w / 80; f.logoScale > lim {
+	// The wordmark is the language's name, from "C" to "JAVASCRIPT", so its
+	// scale comes from the room it has rather than from its length. Height:
+	// the glyph is 7 blocks and its reflection fades over half of that, so
+	// the wordmark needs 10.5 blocks. Width: never more than 45% of the frame,
+	// which only binds for long names.
+	f.logoScale = (bottom - top - fixed) * 2 / 21
+	if lim := w * 9 / 20 / canvas.TextWidth(brand.Lang, 1); f.logoScale > lim {
 		f.logoScale = lim
 	}
 	if f.logoScale < 3 {
@@ -134,14 +126,15 @@ func (f *Finale) Resize(w, h int) {
 	}
 	f.logoW = canvas.TextWidth(brand.Lang, f.logoScale)
 	f.textH = canvas.TextHeight(f.logoScale)
+	f.reflH = f.textH / 2
 	f.logoX = (w - f.logoW) / 2
 
-	blockH := f.textH*2 + fixed
+	blockH := f.textH + f.reflH + fixed
 	y0 := top + (bottom-top-blockH)/2
 
 	f.logoY = y0
 	f.floorY = f.logoY + f.textH
-	f.subY = f.floorY + f.textH + gap
+	f.subY = f.floorY + f.reflH + gap
 	f.statsY = f.subY + subH + gap
 	f.tagY = f.statsY + 3*f.statGap + gap
 	f.subX = (w - canvas.TextWidth(f.sub, f.subScale)) / 2
@@ -303,7 +296,7 @@ func (f *Finale) Draw(fb *canvas.FB, y0, y1 int) {
 	)
 
 	// reflection first, so the wordmark sits on top of its own light
-	fb.DrawTextReflect(f.logoX, f.floorY, brand.Lang, scale, topCol, botCol, offs, 125)
+	fb.DrawTextReflect(f.logoX, f.floorY, brand.Lang, scale, topCol, botCol, offs, 125, f.reflH)
 
 	// a one-pixel dark edge keeps the letters off the background
 	fb.DrawTextOutline(f.logoX, f.logoY, brand.Lang, scale, 0xFF200A18)

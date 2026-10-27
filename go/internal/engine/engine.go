@@ -245,7 +245,7 @@ func (e *Engine) sampleAllocs(t float64) {
 
 const scrollerText = brand.Project + " PRESENTS ... EVERY PIXEL IS " + brand.Lang + " ... NO SHADERS, NO GAME ENGINE, " +
 	"NO GPU WORK BEYOND THE FINAL BLIT ... 921,600 PIXELS PER FRAME COMPUTED ON THE CPU " +
-	"AND HANDED TO EIGHT GOROUTINES ... GREETINGS TO EVERYONE WHO EVER WROTE A PLASMA " +
+	"AND HANDED TO EIGHT " + brand.Workers + " ... GREETINGS TO EVERYONE WHO EVER WROTE A PLASMA " +
 	"IN A LANGUAGE THAT DID NOT NEED A VIRTUAL MACHINE ... THIS IS " + brand.Lang + " AT FULL SPEED ... "
 
 // FPS reports the last frame's rate.

@@ -1,89 +1,88 @@
-# Banc d'essai Goose — le plasma
+# Goose test bench — the plasma
 
-Un seul effet porté de `go/internal/fx/plasma.go` en Goose, pour savoir si
-l'outillage tient la route avant d'engager un portage complet. Le portage est
-fidèle : sur un même instant, les deux rendus diffèrent de **2 pixels sur
-921 600** (écart maximal 5/255, dû à l'arrondi f32/f64 dans la table de sinus).
-La comparaison porte donc bien sur le même travail.
+A single effect ported from `go/internal/fx/plasma.go` to Goose, to find out
+whether the tooling holds up before committing to a full port. The port is
+faithful: at the same instant, the two renders differ by **2 pixels out of
+921,600** (maximum difference 5/255, from f32/f64 rounding in the sine
+table). The comparison is therefore about the same work.
 
-Machine : M1, 8 cœurs, macOS 27. Goose compilé par le compilateur officiel
-(`goose build`), Go 1.27.2. 1280×720, 240 images mesurées après 20 de chauffe.
+Machine: M1, 8 cores, macOS 27. Goose built with the official compiler
+(`goose build`), Go 1.27.2. 1280×720, 240 frames measured after 20 of warm-up.
 
-## Les chiffres
+## The numbers
 
-| | médiane | Mpx/s |
+| | median | Mpx/s |
 | --- | ---: | ---: |
-| Go, 1 worker | 1,53 ms | 600 |
-| **Goose, 1 thread** | **1,48 ms** | **623** |
-| Go, 8 workers (le `bandPool` de la démo) | **0,46 ms** | **1 995** |
-| **Goose, 8 threads** | **0,75 ms** | **1 230** |
+| Go, 1 worker | 1.53 ms | 600 |
+| **Goose, 1 thread** | **1.48 ms** | **623** |
+| Go, 8 workers (the demo's `bandPool`) | **0.46 ms** | **1,995** |
+| **Goose, 8 threads** | **0.75 ms** | **1,230** |
 
-À 2560×1440, la conclusion ne bouge pas : Goose série 5,88 ms contre Go
-série 6,09 ms.
+At 2560×1440 the conclusion does not move: Goose serial 5.88 ms against Go
+serial 6.09 ms.
 
-## Ce que ça dit
+## What it says
 
-**En série, Goose est à la hauteur de Go, voire devant.** 1,48 ms contre
-1,53 ms, avec un écart stable run après run. Ce n'était pas acquis : une
-première version, écrite avec des tableaux dynamiques (`u32[>..]`), tournait
-en 2,02 ms — 36 % plus lent — parce que chaque index coûtait un contrôle de
-bornes et chaque conversion flottante un appel `GS_F2I`. Le passage aux
-tableaux fixes fait élider 62 contrôles sur 79 et supprime les appels.
+**Serially, Goose matches Go, or even beats it.** 1.48 ms against 1.53 ms,
+with a gap that is stable run after run. This was not a given: a first
+version, written with dynamic arrays (`u32[>..]`), ran in 2.02 ms — 36%
+slower — because every index cost a bounds check and every float conversion
+a call to `GS_F2I`. Switching to fixed arrays lets the compiler elide 62 of
+79 checks and removes the calls.
 
-**En parallèle, Goose perd 63 %.** Et la cause n'est pas la vitesse du code
-généré, c'est le modèle de mémoire. Goose interdit toute mémoire partagée
-entre threads (spec §11.2) : un worker est une instance de programme avec sa
-propre copie de chaque globale, et seules les valeurs *plates* — sans
-référence ni slice — franchissent une frontière de thread. Conséquences
-concrètes :
+**In parallel, Goose loses 63%.** And the cause is not the speed of the
+generated code, it is the memory model. Goose forbids any memory shared
+between threads (spec §11.2): a worker is a program instance with its own
+copy of every global, and only *flat* values — no references, no slices —
+cross a thread boundary. Concrete consequences:
 
-- `Draw(fb, y0, y1)` écrivant sa bande du framebuffer partagé n'existe pas.
-  Une bande doit être calculée dans `u32[1280][90]`, renvoyée par la queue,
-  puis recopiée par `main`. Mesuré : **0,136 ms/frame** de copie pure.
-- Une queue typée (`qget<T>`) est une **file de travail partagée**, pas une
-  boîte aux lettres par worker. Huit jobs postés, le premier worker arrivé en
-  prend trois, un autre aucun. Il faut donc que le job nomme sa bande et que
-  `main` réassemble par ce champ. C'est ce qui a produit les 85 000 pixels
-  faux du premier essai, corrigés en réassemblant par `y0`.
-- Chaque worker garde sa copie du champ de distance : **8 × 3,7 Mo**.
+- `Draw(fb, y0, y1)` writing its band of the shared framebuffer does not
+  exist. A band has to be computed into a `u32[1280][90]`, sent back through
+  the queue, then copied by `main`. Measured: **0.136 ms/frame** of pure
+  copying.
+- A typed queue (`qget<T>`) is a **shared work queue**, not a mailbox per
+  worker. Post eight jobs and the first worker to arrive takes three, another
+  none. So the job must name its band and `main` must reassemble by that
+  field. This is what produced the 85,000 wrong pixels of the first attempt,
+  fixed by reassembling by `y0`.
+- Every worker keeps its own copy of the distance field: **8 × 3.7 MB**.
 
-## Le contrôle qui compte
+## The control that matters
 
-Pour vérifier que l'écart parallèle est bien une conséquence du modèle et non
-de mon code, j'ai réécrit le même plasma **en Go**, mais contraint au modèle
-de Goose : workers persistants, tables privées, bande calculée dans un
-tampon et renvoyée par canal, `main` qui recopie.
+To check that the parallel gap really follows from the model and not from my
+code, I rewrote the same plasma **in Go**, but constrained to Goose's model:
+persistent workers, private tables, band computed into a buffer and sent back
+over a channel, `main` doing the copy.
 
-| | médiane |
+| | median |
 | --- | ---: |
-| Go natif (le `bandPool` actuel) | 0,46 ms |
-| Go contraint au modèle Goose | **0,64 ms** |
-| Goose, sous le même modèle | **0,75 ms** |
+| Native Go (the current `bandPool`) | 0.46 ms |
+| Go constrained to the Goose model | **0.64 ms** |
+| Goose, under the same model | **0.75 ms** |
 
-Sous le même modèle, Goose ne paie plus que **17 %** de ralentissement, et ce
-qui restait est la boucle elle-même. Le surcoût dominante — 0,46 → 0,64 ms —
-est le prix du modèle, pas celui du langage.
+Under the same model, Goose pays only a **17%** slowdown, and what remains is
+the loop itself. The dominant overhead — 0.46 → 0.64 ms — is the price of the
+model, not of the language.
 
 ## Verdict
 
-L'outillage tient : compilateur qui se construit, erreurs claires, FFI, C
-généré lisible, `bytes_of`/`write_file`, aucun plantage en 240 images.
-Le langage tient sa promesse de vitesse en série.
+The tooling holds: a compiler that builds itself, clear errors, FFI, readable
+generated C, `bytes_of`/`write_file`, no crash in 240 frames. The language
+keeps its promise of serial speed.
 
-Ce qu'il ne permet pas, c'est d'écrire la démo telle qu'elle est écrite
-aujourd'hui. Le `bandPool` — N goroutines, un framebuffer partagé, zéro
-copie — est le cœur de l'argument parallèle de la démo, et Goose l'interdit
-par construction. Un portage complet serait possible, mais il faudrait soit
-accepter les copies par queue (et la démo afficherait un chiffre moins
-flatteur), soit réécrire chaque effet pour produire des bandes autonomes.
+What it does not allow is writing the demo the way it is written today. The
+`bandPool` — N goroutines, one shared framebuffer, zero copies — is the heart
+of the demo's parallel argument, and Goose forbids it by construction. A full
+port would be possible, but it would mean either accepting the copies through
+the queue (and the demo would show a less flattering number), or rewriting
+every effect to produce self-contained bands.
 
-## Construire et lancer
+## Build and run
 
 ```sh
 goose build plasma.goose -o plasma
 ./plasma
 ```
 
-Affiche les deux régimes, vérifie que les deux rendus sont identiques
-octet pour octet, et écrit `plasma_goose.ppm` pour comparaison avec le rendu
-Go.
+Prints both regimes, checks that the two renders are identical byte for byte,
+and writes `plasma_goose.ppm` for comparison with the Go render.
