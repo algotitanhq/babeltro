@@ -37,7 +37,7 @@ the top of `memory.wat`. Six scenes; STARFIELD, GRID and FINALE are not ported.
 
 ## Pixel differences
 
-None. Every ported scene and rung matches Go exactly (0 differing pixels) at
+None. Every ported scene and rung matches the C reference exactly (0 differing pixels) at
 640x360 on frames 1, 2, 60 and 300, at 1280x720 on 1 and 600, at 1920x1080 on
 1 and 900, and at 333x211 on 1, 7 and 1000. The hand-written `exp` differs
 from Go's `math.Exp` by one ulp in 78 of the 2000 calls of frames 1..1000;

@@ -1,5 +1,5 @@
 import { EFFECTS, LANGS, HOME, TIMING_NOTE } from './content.js';
-import { EXCERPTS, NOTES } from './excerpts.js';
+import { EXCERPTS, NOTES, SOURCES } from './excerpts.js';
 import { startLogo } from './logo.js';
 
 const $ = (id) => document.getElementById(id);
@@ -343,7 +343,7 @@ function toggleDiff(on = !state.diff) {
 
 // race runs each built language in a worker of its own, one after the other
 // so they do not compete for the CPU, on the same 120 frames; it reports the
-// median time per frame and whether the last frame matches Go's.
+// median time per frame and whether the last frame matches the reference's.
 const RACE_FRAMES = 120;
 const RACE_MS = 4000; // a slow interpreter stops early: at least 5 frames, at most 4 s
 let raceKey = '';
@@ -529,7 +529,7 @@ function renderCode() {
         (s.lang === 'c' && !s.step
           ? 'The reference: every other language must match these pixels.'
           : s.lang === 'go' && !s.step
-            ? 'Where the effects were first written; every port was checked against it.'
+            ? 'Where the effects were first written, before C became the reference.'
             : '');
       const label = eff.steps ? ` · step ${rung}: ${eff.steps[rung - 1].name}` : '';
       const body = !ex
@@ -539,13 +539,45 @@ function renderCode() {
           : `<pre>${escapeHtml(ex.code)}</pre>`;
       return `<article class="excerpt" style="--c:${l.color}">
         <header><b>${l.name}${label}</b><span class="how">${l.how}${kb}</span>
-          <span class="where">${ex ? `${ex.file}:${ex.line}` : ''}</span></header>
+          ${ex ? `<button class="full" data-src="${s.lang}|${ex.file}|${ex.line}|${ex.end}" title="Open the whole file, with this excerpt highlighted">${ex.file}:${ex.line} · full file</button>` : ''}</header>
         ${note ? `<p class="note">${inline(note)}</p>` : ''}
         <div class="body">${body}</div>
       </article>`;
     })
     .join('');
 }
+
+// --- the full-file view ---------------------------------------------------
+
+// openSource shows a port's whole file in a drawer, lines from..to
+// highlighted and scrolled into view, with the port's other files listed
+// alongside so the excerpt can be read in its context.
+function openSource(lang, path, from = 0, to = 0) {
+  const l = langOf(lang);
+  const files = SOURCES[lang] ?? {};
+  const text = files[path] ?? '';
+  $('srcLang').textContent = l.name;
+  $('srcLang').style.color = l.color;
+  $('srcPath').textContent = path;
+  $('srcFiles').innerHTML = Object.keys(files)
+    .sort()
+    .map((p) => `<button data-file="${lang}|${p}" aria-current="${p === path}">${p.split('/').slice(2).join('/') || p}</button>`)
+    .join('');
+  const mark = {
+    line(node, line) {
+      if (line >= from && line <= to) this.addClassToHast(node, 'hl');
+    },
+  };
+  $('srcCode').innerHTML = highlighter
+    ? highlighter.codeToHtml(text, { lang: l.hl, theme: 'github-dark-dimmed', transformers: [mark] })
+    : `<pre>${escapeHtml(text)}</pre>`;
+  $('source').hidden = false;
+  const first = $('srcCode').querySelector('.hl');
+  if (first) first.scrollIntoView({ block: 'center' });
+  else $('srcCode').scrollTop = 0;
+}
+
+const closeSource = () => ($('source').hidden = true);
 
 // inline renders the little Markdown the notes use: `code` and **bold**
 const inline = (s) =>
@@ -630,9 +662,16 @@ async function route() {
 // --- wiring ---------------------------------------------------------------
 
 document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) return closeSource();
   const b = e.target.closest('button');
   if (!b) return;
-  if (b.dataset.pane) selectLang(Number(b.dataset.pane), b.dataset.lang || null);
+  if (b.dataset.src) {
+    const [lang, path, from, to] = b.dataset.src.split('|');
+    openSource(lang, path, Number(from), Number(to));
+  } else if (b.dataset.file) {
+    const [lang, path] = b.dataset.file.split('|');
+    openSource(lang, path);
+  } else if (b.dataset.pane) selectLang(Number(b.dataset.pane), b.dataset.lang || null);
   else if (b.dataset.rung) selectRung(Number(b.dataset.rung));
 });
 $('play').onclick = togglePlay;
@@ -645,6 +684,10 @@ $('res').onchange = (e) => setResolution(e.target.value);
 window.addEventListener('hashchange', route);
 
 document.addEventListener('keydown', (e) => {
+  if (!$('source').hidden) {
+    if (e.key === 'Escape') closeSource();
+    return;
+  }
   if (state.view !== 'lab') return;
   if (e.target.closest('select, input') || e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key;

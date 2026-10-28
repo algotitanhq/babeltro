@@ -28,7 +28,7 @@ arithmetic, is the one scene clearly slower than Go's wasm.
   `sin()`: the helper call, though inlined by V8, made the loop about 2.8x
   slower (2.5 ms against 0.9 ms).
 - **PLASMA/1**: `Math.sin` on a float32 argument, each result wrapped in
-  `f32` like Go's `sin32`. It matches Go pixel for pixel at 640x360,
+  `f32` like Go's `sin32`. It matches the C reference pixel for pixel at 640x360,
   1280x720, 1920x1080 and 333x187: whatever V8's and Go's sines differ by does
   not survive the float32 rounding and the 256-level quantisation. It is about
   2x faster than Go's wasm (10 ms against 22 ms at 640x360): wasm has no sine

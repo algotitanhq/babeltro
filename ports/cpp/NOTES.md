@@ -34,7 +34,7 @@ The wasi-runtimes sysroot only has libc++, so libc comes from wasi-libc.
   hardening is off.
 - **PLASMA/1**: `std::sin` is overloaded, so float in gives float out
   (libc's `sinf`). Go only has the double version and rounds its result.
-  No pixel changed against Go's rung (640x360, 1280x720, 333x211).
+  No pixel changed against the reference's rung (640x360, 1280x720, 333x211).
 - **ROTOZOOM**: the 1 MiB texture is a function-local `static const
   std::vector`, built on the first start and kept for the module's life.
   Each scene holds a `std::span` on it. `hsl_to_rgb` is `constexpr`, but the
@@ -61,7 +61,7 @@ The wasi-runtimes sysroot only has libc++, so libc comes from wasi-libc.
 
 ## Pixel differences
 
-None outside the language name. Every scene other than FINALE matches Go
+None outside the language name. Every scene other than FINALE matches the C reference
 exactly (0 differing pixels) at 640x360 on frames 1, 2, 60 and 300, at
 1280x720 on frames 1 and 600, at 1920x1080 on frames 1 and 900, and at
 333x211 on frames 1, 7 and 1000. So do the ladder rungs at 640x360. In

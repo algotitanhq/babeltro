@@ -60,6 +60,6 @@ and `exp` cost no pixel.
 
 FINALE differs over most of the card. `ASSEMBLYSCRIPT` is 83 font columns
 wide against 11 for `GO`, so the logo is smaller and everything below it
-moves up. A scratch build with `LANG = 'GO'` matches Go exactly (0 differing
+moves up. A scratch build with `LANG = 'GO'` matches the C reference exactly (0 differing
 pixels) at 640x360, 1280x720, 1920x1080, 320x200 and 333x187, frames 1, 2,
 60, 300 and 601.

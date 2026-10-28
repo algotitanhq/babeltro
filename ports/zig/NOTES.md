@@ -49,11 +49,11 @@ time.
 
 ## Pixel differences
 
-None outside the language name. Every scene other than FINALE matches Go
+None outside the language name. Every scene other than FINALE matches the C reference
 exactly (0 differing pixels) at 640x360 on frames 1, 2, 60 and 300, at
 1280x720 on frames 1 and 600, at 1920x1080 on frames 1 and 900, and at
 333x211 on frames 1, 7 and 1000. Every rung of the PLASMA, TUNNEL and
-MANDELBROT ladders matches Go's rung exactly at 640x360 and 1280x720. The
+MANDELBROT ladders matches the reference's rung exactly at 640x360 and 1280x720. The
 FINALE logo and subtitle spell `ZIG`. A scratch build with `-Dlang=GO` matches Go's finale exactly at all four
 sizes. Debug and ReleaseSafe builds give the same pixels, and no safety check
 fires (overflow, bounds or `@intFromFloat` range).

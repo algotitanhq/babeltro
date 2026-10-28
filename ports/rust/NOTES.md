@@ -1,6 +1,6 @@
 # Rust port: notes
 
-Same pixels as the Go reference, written as Rust. Global state is a
+Same pixels as the C reference, written as Rust. Global state is a
 `thread_local!` `RefCell` (see `src/lib.rs`): safe, and on single-threaded
 wasm it is a plain static plus one borrow-flag check per call.
 

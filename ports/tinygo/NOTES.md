@@ -1,6 +1,6 @@
 # TinyGo: the same Go, another compiler
 
-This is not a port. It is the Go reference — the very same files under
+This is not a port. It is the Go version — the very same files under
 `go/` — built by TinyGo instead of the official Go compiler. TinyGo
 compiles through LLVM, like clang and rustc; the official compiler has its
 own WebAssembly backend, which keeps goroutines working by making every

@@ -21,7 +21,7 @@ ever one of each. Build: `scripts/build-c.sh`.
 - **PLASMA/1**: C has a float sine, `sinf`, so the naive version calls it
   directly; Go has only `math.Sin` and rounds its double result to float32.
   wasi-libc's `sinf` is not guaranteed correctly rounded, yet it changed no
-  pixel against Go's rung (640x360, 1280x720, 1920x1080, 333x211).
+  pixel against the reference's rung (640x360, 1280x720, 1920x1080, 333x211).
 - **ROTOZOOM**: the 1 MiB texture lives in static storage and is built once
   per module, not once per scene start. `math.Mod` is `fmod`. Go rounds the
   texture coordinates to float32 before using them in double maths; the
@@ -44,7 +44,7 @@ ever one of each. Build: `scripts/build-c.sh`.
 
 ## Pixel differences
 
-None outside the language name. Every scene other than FINALE matches Go
+None outside the language name. Every scene other than FINALE matches the C reference
 exactly (0 differing pixels) at 640x360 on frames 1, 2, 60 and 300, at
 1280x720 on frames 1 and 600, at 1920x1080 on frames 1 and 900, and at
 333x211 on frames 1, 7 and 1000. In FINALE the logo and subtitle spell `C`

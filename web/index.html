@@ -108,6 +108,22 @@
 
     <section class="code" id="code" aria-label="Source"></section>
 
+    <!-- the full source of a port, opened from an excerpt -->
+    <div class="source" id="source" hidden>
+      <div class="scrim" data-close></div>
+      <section class="drawer" role="dialog" aria-modal="true" aria-label="Full source">
+        <header>
+          <b id="srcLang"></b>
+          <span id="srcPath"></span>
+          <button class="icon" data-close title="Close (Esc)" aria-label="Close">✕</button>
+        </header>
+        <div class="drawer-body">
+          <nav id="srcFiles" aria-label="Files"></nav>
+          <div class="drawer-code" id="srcCode"></div>
+        </div>
+      </section>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

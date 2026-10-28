@@ -47,7 +47,7 @@ one row in flight. Wherever Go has a float32 operation, there is a rounding.
   and Go's five roundings move `v*36 + 127.5` by less than 3.4e-5: any value
   further than 1e-4 from an integer truncates the same way. At 640x360 about 45
   pixels per frame replay the palette index and 1,200 (0.5%) the radial
-  index; the query costs 1.35x the plain double one and matches Go everywhere.
+  index; the query costs 1.35x the plain double one and matches the C reference everywhere.
 - **PLASMA/1**: four `sin()` per pixel and every argument rounded: nine
   stacked subqueries. SQLite's `sin` is a C call, cheaper than the B-tree
   seek that replaces it on the next rung (246 ms against 317 at 320x180).

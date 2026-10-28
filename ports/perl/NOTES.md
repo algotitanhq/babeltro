@@ -30,7 +30,7 @@ Yes, Perl has an address-of operator.
   over `grep`, which is about as Perl as a tunnel gets.
 - **TUNNEL/1**: the per-pixel `sqrt`, division and `atan2` are in the
   `polar` sub that builds the tables. Step 1 calls it for every row of every
-  frame. Perl's `atan2` matches Go's after float32 rounding.
+  frame. Perl's `atan2` matches C's after float32 rounding.
 - **FIRE**: integers only, and each random number depends on the last,
   so this one stays a plain pixel loop. Perl's integers are 64-bit, so
   xorshift32 masks its left shifts with `& 0xFFFFFFFF`. The heat buffer

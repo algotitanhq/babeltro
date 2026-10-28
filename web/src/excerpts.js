@@ -16,7 +16,11 @@ const portFiles = import.meta.glob(
   { query: '?raw', import: 'default', eager: true },
 );
 
-const goFiles = import.meta.glob('../../go/internal/fx/*.go', { query: '?raw', import: 'default', eager: true });
+const goFiles = import.meta.glob(['../../go/internal/{fx,fmath,palette,canvas,brand}/*.go', '../../go/cmd/wasm/*.go'], {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
 // TinyGo builds the Go sources themselves, so it shows the same code
 const sources = { go: goFiles, tinygo: goFiles };
 for (const [path, text] of Object.entries(portFiles)) {
@@ -39,7 +43,7 @@ function extract(files) {
         body = [];
         at = i + 2;
       } else if (scene && /@end\b/.test(line)) {
-        out[scene] = { code: dedent(body), file: path.replace(/^(\.\.\/)+/, ''), line: at };
+        out[scene] = { code: dedent(body), file: path.replace(/^(\.\.\/)+/, ''), line: at, end: i };
         scene = null;
       } else if (scene) {
         body.push(line);
@@ -55,6 +59,15 @@ function dedent(lines) {
   const cut = indents.length ? Math.min(...indents) : 0;
   return expanded.map((l) => l.slice(cut)).join('\n').replace(/\s+$/, '');
 }
+
+// SOURCES[lang] lists every file of a port, path → text, for the full-file
+// view: an excerpt is easier to read once you have seen where it sits.
+export const SOURCES = Object.fromEntries(
+  Object.entries(sources).map(([lang, files]) => [
+    lang,
+    Object.fromEntries(Object.entries(files).map(([p, t]) => [p.replace(/^(\.\.\/)+/, ''), t])),
+  ]),
+);
 
 export const EXCERPTS = Object.fromEntries(
   Object.entries(sources).map(([lang, files]) => [lang, extract(files)]),

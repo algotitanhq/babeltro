@@ -9,14 +9,14 @@ whoever picks it up — a person or an agent.
   contract (`spec/ABI.md`), and the native demo it started as.
 - **Ports**: eleven besides Go — TinyGo, C, C++, Rust, Zig, AssemblyScript,
   hand-written WebAssembly, JavaScript, Python, Perl, SQL — under `ports/`.
-  Every effect a port implements is byte-identical to Go; the finale differs
+  Every effect a port implements is byte-identical to the C reference; the finale differs
   only through the language's name and the layout that follows its width.
 - **Ladders**: the plasma, tunnel and Mandelbrot have optimisation steps
   (`bb_step`), identical in every port that has them, rung for rung.
 - **The lab** (`web/`): a home page of live cards, then one screen per
   effect — two languages side by side, pixel diff, ladder steps, each
   language's hot loop with a note, and a race across all languages.
-- **The checker** (`tools/check.mjs`): any port against Go, any scene, step,
+- **The checker** (`tools/check.mjs`): any port against the C reference (or `--ref go`), any scene, step,
   size and frame; PNG dumps of the differences.
 
 ## Rules any new work keeps
