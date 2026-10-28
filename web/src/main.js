@@ -643,6 +643,21 @@ document.addEventListener('keydown', (e) => {
 
 // --- start ----------------------------------------------------------------
 
+// One import per grammar, spelled out so the bundler can split them.
+const GRAMMARS = {
+  go: () => import('@shikijs/langs/go'),
+  c: () => import('@shikijs/langs/c'),
+  cpp: () => import('@shikijs/langs/cpp'),
+  rust: () => import('@shikijs/langs/rust'),
+  zig: () => import('@shikijs/langs/zig'),
+  javascript: () => import('@shikijs/langs/javascript'),
+  typescript: () => import('@shikijs/langs/typescript'),
+  python: () => import('@shikijs/langs/python'),
+  perl: () => import('@shikijs/langs/perl'),
+  wasm: () => import('@shikijs/langs/wasm'),
+  sql: () => import('@shikijs/langs/sql'),
+};
+
 async function main() {
   // a language is offered only once its module is actually there
   await Promise.all(
@@ -653,24 +668,21 @@ async function main() {
   );
   for (const id of modulePorts) available.add(id);
 
+  const count = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'][available.size] ?? available.size;
+  $('tagline').textContent = `Nine demoscene effects · ${count} languages · the same pixels`;
   buildHome();
   await route();
   requestAnimationFrame(loop);
 
-  // only the five grammars and one theme: the full shiki bundle is megabytes
+  // only the grammars the ports use and one theme: the full shiki bundle is
+  // megabytes
   const [{ createHighlighterCore }, { createJavaScriptRegexEngine }] = await Promise.all([
     import('shiki/core'),
     import('shiki/engine/javascript'),
   ]);
   highlighter = await createHighlighterCore({
     themes: [import('@shikijs/themes/github-dark-dimmed')],
-    langs: [
-      import('@shikijs/langs/go'),
-      import('@shikijs/langs/c'),
-      import('@shikijs/langs/rust'),
-      import('@shikijs/langs/zig'),
-      import('@shikijs/langs/javascript'),
-    ],
+    langs: [...new Set(LANGS.map((l) => l.hl))].map((id) => GRAMMARS[id]()),
     engine: createJavaScriptRegexEngine(),
   });
   renderCode();

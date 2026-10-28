@@ -1,4 +1,4 @@
-# binaires compilés
+# build outputs
 /go/babeltro
 /goose/plasma
 *.ppm
