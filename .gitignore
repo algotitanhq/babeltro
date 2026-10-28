@@ -3,3 +3,7 @@
 /goose/plasma
 *.ppm
 .DS_Store
+node_modules/
+/web/dist/
+/web/public/wasm/
+/rust/target/

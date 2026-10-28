@@ -2,9 +2,9 @@ package fx
 
 import (
 	"math"
-	"math/rand"
 
 	"babeltro/internal/canvas"
+	"babeltro/internal/fmath"
 )
 
 // Starfield is a warp-speed star tunnel: stars live in 3D, get projected in
@@ -15,6 +15,7 @@ type Starfield struct {
 	stars  []star3
 	proj   []starProj
 	bg     []uint32 // precomputed backdrop: it never changes, so build it once
+	rng    fmath.Rng
 	seeded bool
 }
 
@@ -39,7 +40,8 @@ func (s *Starfield) Resize(w, h int) {
 	}
 	s.w, s.h = w, h
 	if !s.seeded {
-		rng := rand.New(rand.NewSource(0x6005E))
+		s.rng = 0x6005E
+		rng := &s.rng
 		s.stars = make([]star3, 1600)
 		for i := range s.stars {
 			s.stars[i] = star3{
@@ -104,8 +106,8 @@ func (s *Starfield) Prepare(st State, w, h int) {
 		p.z -= dz
 		if p.z < 0.8 {
 			p.z += 40
-			p.x = (rand.Float32()*2 - 1) * 1.1
-			p.y = (rand.Float32()*2 - 1) * 1.1
+			p.x = (s.rng.Float32()*2 - 1) * 1.1
+			p.y = (s.rng.Float32()*2 - 1) * 1.1
 		}
 		f := 1.0 / p.z
 		zoom := float32(w) * 0.78

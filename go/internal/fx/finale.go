@@ -2,12 +2,22 @@ package fx
 
 import (
 	"math"
-	"math/rand"
 
 	"babeltro/internal/brand"
 	"babeltro/internal/canvas"
+	"babeltro/internal/fmath"
 	"babeltro/internal/hud"
 )
+
+// PanelBottom reports the last row the HUD panel covers, so the finale can
+// compose below it. A host that draws no HUD in the frame (the browser lab)
+// sets it to nil and the card uses the whole height.
+var PanelBottom = hud.PanelBottom
+
+// FinaleTag is the punchline under the closing numbers. The native demo
+// boasts about its workers; the browser lab runs on one thread, so it says
+// that instead, in words that are the same in every port.
+var FinaleTag = "60 FPS - ONE CPU - 8 " + brand.Workers
 
 // starBg is a fixed background star in normalised coordinates; the finale
 // only needs twinkle, not motion.
@@ -76,7 +86,7 @@ func (f *Finale) Resize(w, h int) {
 	f.w, f.h = w, h
 
 	if f.stars == nil {
-		rng := rand.New(rand.NewSource(0xF1A1E))
+		rng := fmath.Rng(0xF1A1E)
 		f.stars = make([]starBg, 260)
 		for i := range f.stars {
 			f.stars[i] = starBg{
@@ -100,7 +110,7 @@ func (f *Finale) Resize(w, h int) {
 	}
 	f.statGap = canvas.TextHeight(f.statsScale) * 3 / 2
 
-	f.tag = "60 FPS - ONE CPU - 8 " + brand.Workers
+	f.tag = FinaleTag
 	f.tagScale = f.statsScale + 1
 	tagH := canvas.TextHeight(f.tagScale)
 
@@ -109,7 +119,10 @@ func (f *Finale) Resize(w, h int) {
 	// hud.PanelBottom reports the row it actually reaches, so the card composes
 	// in the band below it and sizes the wordmark to the room that is left.
 	gap := h / 48
-	top := hud.PanelBottom(w, h) + h/40
+	top := h / 40
+	if PanelBottom != nil {
+		top += PanelBottom(w, h)
+	}
 	bottom := int(float32(h) * 0.90)
 	fixed := subH + 3*f.statGap + tagH + 4*gap // everything but the wordmark
 	// The wordmark is the language's name, from "C" to "JAVASCRIPT", so its
