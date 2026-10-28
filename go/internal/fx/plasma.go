@@ -65,6 +65,7 @@ func (p *Plasma) Prepare(s State, w, h int) {
 	p.phase = t * 2.6
 }
 
+// @excerpt PLASMA
 func (p *Plasma) Draw(fb *canvas.FB, y0, y1 int) {
 	w := fb.W
 	pix := fb.Pix
@@ -87,3 +88,5 @@ func (p *Plasma) Draw(fb *canvas.FB, y0, y1 int) {
 		}
 	}
 }
+
+// @end

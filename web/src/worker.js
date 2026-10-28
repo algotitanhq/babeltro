@@ -1,0 +1,55 @@
+// One worker per pane: each language renders on its own thread, so comparing
+// two of them costs no frame rate, and the time it reports is the port's
+// render alone, without the page's drawing.
+
+import { fromWasm, fromModule } from './host/ports.js';
+
+// A glob rather than a plain import, so the lab still builds before the
+// JavaScript port exists.
+const jsPort = Object.values(import.meta.glob('../../js/babeltro.js'))[0];
+
+let port = null;
+let w = 0;
+let h = 0;
+
+const log = (line) => self.postMessage({ type: 'log', line });
+
+self.onmessage = async ({ data: msg }) => {
+  switch (msg.type) {
+    case 'load': {
+      let bytes = 0;
+      if (msg.lang === 'js') {
+        port = fromModule(await jsPort());
+      } else {
+        const buf = await (await fetch(msg.url)).arrayBuffer();
+        bytes = buf.byteLength;
+        port = await fromWasm(buf, log);
+      }
+      self.postMessage({ type: 'loaded', bytes });
+      break;
+    }
+    case 'init':
+      w = msg.w;
+      h = msg.h;
+      port.init(w, h);
+      self.postMessage({ type: 'ready' });
+      break;
+    case 'start':
+      port.start(msg.scene);
+      self.postMessage({ type: 'ready' });
+      break;
+    case 'render': {
+      // Replaying frames the page skipped (after a seek) keeps the stateful
+      // scenes on the same history as every other language.
+      let ms = 0;
+      for (let n = msg.from; n <= msg.n; n++) {
+        const t = performance.now();
+        port.render(n);
+        ms = performance.now() - t;
+      }
+      const pixels = port.pixels().slice().buffer;
+      self.postMessage({ type: 'frame', n: msg.n, ms, pixels }, [pixels]);
+      break;
+    }
+  }
+};

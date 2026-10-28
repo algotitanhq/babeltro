@@ -52,6 +52,7 @@ func (m *Metaballs) Draw(fb *canvas.FB, y0, y1 int) {
 	for i := 0; i < m.n; i++ {
 		rad2[i] = m.rad[i] * m.rad[i]
 	}
+	// @excerpt METABALLS
 	for y := y0; y < y1; y++ {
 		fy := float32(y)/float32(h) - 0.5
 		row := y * w
@@ -78,4 +79,5 @@ func (m *Metaballs) Draw(fb *canvas.FB, y0, y1 int) {
 			pix[row+x] = pal[idx]
 		}
 	}
+	// @end
 }

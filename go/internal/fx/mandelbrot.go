@@ -113,6 +113,7 @@ func (m *Mandelbrot) Draw(fb *canvas.FB, y0, y1 int) {
 	}
 }
 
+// @excerpt MANDELBROT
 func mandelIter(cx, cy float64, max int) int {
 	// cheap escape test for the main cardioid and the period-2 bulb
 	x := cx - 0.25
@@ -137,3 +138,5 @@ func mandelIter(cx, cy float64, max int) int {
 	}
 	return max
 }
+
+// @end

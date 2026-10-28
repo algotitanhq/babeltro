@@ -82,6 +82,7 @@ func (f *Fire) Draw(fb *canvas.FB, y0, y1 int) {
 	for x := 0; x < w; x++ {
 		pix[lastRow+x] = pal[buf[lastRow+x]]
 	}
+	// @excerpt FIRE
 	for y := h - 1; y > 0; y-- {
 		src := y * w
 		dst := (y - 1) * w
@@ -112,4 +113,5 @@ func (f *Fire) Draw(fb *canvas.FB, y0, y1 int) {
 			prow[x] = pal[brow[x]]
 		}
 	}
+	// @end
 }

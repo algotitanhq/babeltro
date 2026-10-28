@@ -122,6 +122,7 @@ func (g *Grid) Draw(fb *canvas.FB, y0, y1 int) {
 			sb = float32(0.25 + 0.55*u)
 		}
 
+		// @excerpt GRID
 		for x := 0; x < w; x++ {
 			r, gg, b := skyR, skyG, skyB
 
@@ -165,6 +166,7 @@ func (g *Grid) Draw(fb *canvas.FB, y0, y1 int) {
 
 			pix[row+x] = canvas.FromFloat(float64(r), float64(gg), float64(b))
 		}
+		// @end
 	}
 }
 

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>babeltro</title>
+    <meta name="description" content="Nine classic demoscene effects, written in several languages, rendering the same pixels in your browser." />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <h1 class="mark">BABELTRO</h1>
+      <p class="tagline">Nine demoscene effects · four languages · the same pixels</p>
+      <label class="res">
+        <span>Resolution</span>
+        <select id="res">
+          <option value="640x360" selected>640 × 360</option>
+          <option value="960x540">960 × 540</option>
+          <option value="1280x720">1280 × 720</option>
+        </select>
+      </label>
+    </header>
+
+    <nav class="rail" id="effects" aria-label="Effects"></nav>
+
+    <main class="stage">
+      <div class="panes" id="panes">
+        <figure class="pane" data-pane="0">
+          <canvas></canvas>
+          <figcaption><span class="who"></span><span class="ms"></span></figcaption>
+        </figure>
+        <figure class="pane" data-pane="1" hidden>
+          <canvas></canvas>
+          <figcaption><span class="who"></span><span class="ms"></span></figcaption>
+        </figure>
+      </div>
+      <div class="transport">
+        <button id="play" class="icon" title="Play / pause (Space)" aria-label="Play or pause">❚❚</button>
+        <button id="step" class="icon" title="Next frame (.)" aria-label="Next frame">⏭</button>
+        <button id="restart" class="icon" title="Restart the scene (R)" aria-label="Restart">⟲</button>
+        <span class="frame" id="frame">frame 0</span>
+        <span class="fps" id="fps"></span>
+      </div>
+    </main>
+
+    <aside class="side">
+      <section>
+        <h2>Language</h2>
+        <div class="picker" id="pickA" role="radiogroup" aria-label="Language"></div>
+      </section>
+      <section>
+        <h2>Compare with</h2>
+        <div class="picker" id="pickB" role="radiogroup" aria-label="Compare with"></div>
+      </section>
+      <section class="verdict" id="verdict" hidden>
+        <p id="verdictText"></p>
+        <label class="toggle"><input type="checkbox" id="diff" /> Show the differences (D)</label>
+      </section>
+      <section class="about">
+        <h2 id="effName"></h2>
+        <p class="trick" id="effTrick"></p>
+        <p id="effText"></p>
+      </section>
+    </aside>
+
+    <section class="code" id="code" aria-label="Source"></section>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -48,6 +48,7 @@ func (t *Tunnel) Draw(fb *canvas.FB, y0, y1 int) {
 	adv := tm * 3.0
 	spin := tm * 0.25
 
+	// @excerpt TUNNEL
 	for y := y0; y < y1; y++ {
 		row := y * w
 		for x := 0; x < w; x++ {
@@ -80,4 +81,5 @@ func (t *Tunnel) Draw(fb *canvas.FB, y0, y1 int) {
 			pix[i] = pal[idx]
 		}
 	}
+	// @end
 }

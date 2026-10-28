@@ -106,6 +106,7 @@ func (r *Rotozoom) Draw(fb *canvas.FB, y0, y1 int) {
 	offx, offy := r.offx, r.offy
 	tex := r.tex
 
+	// @excerpt ROTOZOOM
 	for y := y0; y < y1; y++ {
 		dy := float32(y) - cy
 		row := y * w
@@ -118,4 +119,5 @@ func (r *Rotozoom) Draw(fb *canvas.FB, y0, y1 int) {
 			pix[row+x] = tex[iy*texSize+ix]
 		}
 	}
+	// @end
 }

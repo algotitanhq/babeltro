@@ -101,6 +101,7 @@ func (s *Starfield) Prepare(st State, w, h int) {
 	}
 
 	dz := speed * dt
+	// @excerpt STARFIELD
 	for i := range s.stars {
 		p := &s.stars[i]
 		p.z -= dz
@@ -129,6 +130,7 @@ func (s *Starfield) Prepare(st State, w, h int) {
 			c: 0xFF000000 | bl<<16 | g<<8 | r,
 		}
 	}
+	// @end
 }
 
 func (s *Starfield) Draw(fb *canvas.FB, y0, y1 int) {

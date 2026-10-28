@@ -295,6 +295,7 @@ func (f *Finale) Draw(fb *canvas.FB, y0, y1 int) {
 		}
 	}
 
+	// @excerpt FINALE
 	// --- logo ---
 	scale := f.logoScale
 	offs := f.offs
@@ -317,6 +318,7 @@ func (f *Finale) Draw(fb *canvas.FB, y0, y1 int) {
 	// a one-pixel dark edge keeps the letters off the background
 	fb.DrawTextOutline(f.logoX, f.logoY, brand.Lang, scale, 0xFF200A18, offs)
 	fb.DrawTextGradient(f.logoX, f.logoY, brand.Lang, scale, topCol, midCol, botCol, offs, true)
+	// @end
 
 	// --- subtitle with rules either side ---
 	subW := canvas.TextWidth(f.sub, f.subScale)
