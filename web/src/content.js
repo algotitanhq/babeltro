@@ -139,8 +139,8 @@ export const LANGS = [
     name: 'Hand-written wasm',
     color: '#b48cff',
     hl: 'wasm',
-    how: 'WebAssembly text, written by hand: no compiler at all.',
-    scenes: [2, 6],
+    how: 'Hand-written WAT, no compiler: its own sin, atan2 and exp, a 7.6 KB module.',
+    scenes: [1, 2, 3, 4, 6, 7],
   },
   {
     id: 'js',
@@ -170,8 +170,8 @@ export const LANGS = [
     name: 'SQL',
     color: '#c9cfd8',
     hl: 'sql',
-    how: 'SQLite compiled to wasm: every pixel is a row of a query.',
-    scenes: [2],
+    how: 'SQLite → wasm via sql.js. Each frame is one blob from a query; float32 is emulated.',
+    scenes: [1, 2, 6, 7],
   },
 ];
 

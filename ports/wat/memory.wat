@@ -1,0 +1,55 @@
+;; babeltro, hand-written WebAssembly: the memory map
+;;
+;; This port has no compiler. Every file in ports/wat/ is a list of module
+;; fields (memory, globals, functions, exports) and build.sh wraps them in a
+;; single (module ...) before handing it to wat2wasm, in this order:
+;;
+;;   memory.wat      this map, and the state every scene shares
+;;   fmath.wat       sin, cos, atan2, exp: the maths wasm does not have
+;;   palette.wat     the 256-colour ramps
+;;   plasma.wat  fire.wat  tunnel.wat  rotozoom.wat  metaballs.wat
+;;   mandelbrot.wat  one file per scene
+;;   main.wat        the exports the lab calls, and the start function
+;;
+;; WebAssembly has one flat, byte-addressed, little-endian linear memory and
+;; nothing else: no heap, no allocator, no stack you can point into. So we do
+;; what a demo on a 1990 machine did: decide where everything lives, once.
+;;
+;;   address    size          what
+;;   0x000100   8 x 32 B      palette stops, while a palette is being built
+;;   0x000400   21 x 8 B      atan series coefficients, (-1)^k / (2k+1), f64
+;;   0x000800   6 x 16 B      metaballs: per-ball offset x, offset y, r^2 (f32)
+;;   0x001000   8193 x 4 B    SIN table, f32: sin(2*pi*i/8192), i = 0..8192
+;;   0x00A000   8193 x 4 B    COS table, f32
+;;   0x013000   256 x 4 B     SUNSET palette (plasma, metaballs)
+;;   0x013400   256 x 4 B     ICE palette    (tunnel, mandelbrot)
+;;   0x013800   256 x 4 B     EMBER palette  (fire)
+;;   0x020000   512x512 x 4 B rotozoom texture, built on first use, 1 MiB
+;;   0x120000   w x h x 4 B   FRAMEBUFFER, the address bb_init returns
+;;   after it   (see below)   SCRATCH: the current scene's own tables
+;;
+;; Only one scene runs at a time, so they all share SCRATCH (a union, in C
+;; terms) and bb_start rebuilds whatever the new scene keeps there:
+;;   plasma   rad (w*h f32), sx (w f32), sy (h f32), sxy (w+h f32)
+;;   tunnel   depth (w*h f32), angle (w*h f32)
+;;   fire     heat (w*h bytes)
+;;
+;; The addresses are written as numbers in the code, mostly as the `offset=`
+;; immediate of a load or store: WAT has no named constants. An immutable
+;; global would do, but `offset=0x1000` costs nothing at run time and reads
+;; like the assembly this is.
+;;
+;; Pixels are u32 0xAABBGGRR, so in memory R, G, B, A: an ImageData buffer.
+
+;; 18 pages of 64 KiB hold everything up to the framebuffer; bb_init grows
+;; the memory for the framebuffer and the scratch tables.
+(memory (export "memory") 18)
+
+;; the framebuffer: its size, and where the scratch tables start after it
+(global $W       (mut i32) (i32.const 0))
+(global $H       (mut i32) (i32.const 0))
+(global $SCRATCH (mut i32) (i32.const 0))
+
+;; the current scene and the rung of its optimisation ladder (0 = optimised)
+(global $scene (mut i32) (i32.const -1))
+(global $rung  (mut i32) (i32.const 0))

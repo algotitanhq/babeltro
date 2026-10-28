@@ -1,0 +1,9 @@
+{
+  "name": "babeltro-port-sql",
+  "private": true,
+  "type": "module",
+  "description": "babeltro's effects as SQLite queries, run by sql.js (SQLite compiled to WebAssembly)",
+  "dependencies": {
+    "sql.js": "1.14.2"
+  }
+}
