@@ -4,15 +4,21 @@
 
 use strict;
 use warnings;
-use Plasma;
+use Starfield;
 use Tunnel;
+use Plasma;
+use Rotozoom;
+use Metaballs;
+use Grid;
 use Fire;
+use Mandelbrot;
+use Finale;
 
-my %SCENES = (1 => 'Tunnel', 2 => 'Plasma', 6 => 'Fire');
+my @SCENES = qw(Starfield Tunnel Plasma Rotozoom Metaballs Grid Fire Mandelbrot Finale);
 my ($W, $H, $fx);
 
 sub bb_init  { ($W, $H) = @_; return }
-sub bb_start { my $class = $SCENES{ $_[0] } or die "no scene $_[0] in Perl\n"; $fx = $class->new($W, $H); return }
+sub bb_start { my $class = $SCENES[ $_[0] ] or die "no scene $_[0] in Perl\n"; $fx = $class->new($W, $H); return }
 sub bb_step  { $fx->step($_[0]); return }
 
 # bb_render packs the frame into $FB, one string of w*h little-endian u32

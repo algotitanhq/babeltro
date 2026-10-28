@@ -22,13 +22,19 @@ import { ZeroPerl, MemoryFileSystem } from './vendor/zeroperl-ts/index.js';
 const WASM = new URL('./vendor/zeroperl-ts/zeroperl.wasm', import.meta.url);
 const SOURCES = {
   'FMath.pm': new URL('./FMath.pm', import.meta.url),
-  'Plasma.pm': new URL('./Plasma.pm', import.meta.url),
+  'Canvas.pm': new URL('./Canvas.pm', import.meta.url),
+  'Starfield.pm': new URL('./Starfield.pm', import.meta.url),
   'Tunnel.pm': new URL('./Tunnel.pm', import.meta.url),
+  'Plasma.pm': new URL('./Plasma.pm', import.meta.url),
+  'Rotozoom.pm': new URL('./Rotozoom.pm', import.meta.url),
+  'Metaballs.pm': new URL('./Metaballs.pm', import.meta.url),
+  'Grid.pm': new URL('./Grid.pm', import.meta.url),
   'Fire.pm': new URL('./Fire.pm', import.meta.url),
+  'Mandelbrot.pm': new URL('./Mandelbrot.pm', import.meta.url),
+  'Finale.pm': new URL('./Finale.pm', import.meta.url),
   'babeltro.pl': new URL('./babeltro.pl', import.meta.url),
 };
 
-export const scenes = [1, 2, 6];
 
 const inNode = typeof process !== 'undefined' && !!process.versions?.node;
 

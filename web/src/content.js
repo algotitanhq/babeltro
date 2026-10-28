@@ -170,7 +170,6 @@ export const LANGS = [
     color: '#d06bd4',
     hl: 'perl',
     how: 'Perl 5.42 (zeroperl) compiled to wasm; float32 rounded via pack \'f\'.',
-    scenes: [1, 2, 6],
     res: [160, 90], // an interpreter: the lab switches to this size
   },
   {

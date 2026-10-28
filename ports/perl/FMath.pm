@@ -12,7 +12,7 @@ package FMath;
 use strict;
 use warnings;
 use Exporter qw(import);
-our @EXPORT = qw(f32 tsin tsin01 PI TAB_SIZE TAB_MASK INV2PI @SIN @COS $SUNSET $ICE $EMBER);
+our @EXPORT = qw(f32 tsin tcos tsin01 rng_next rng_f32 clamp01 from_float PI TAB_SIZE TAB_MASK INV2PI @SIN @COS $SUNSET $ICE $EMBER);
 
 # f32 LIST rounds each number to the nearest float32 (in scalar context,
 # the first one). For + - * / and sqrt, computing in double and rounding
@@ -36,9 +36,35 @@ $COS[TAB_SIZE] = $COS[0];
 # On a negative int, & works on its two's-complement bits, again like Go.
 sub tsin { map { $SIN[int($_) & TAB_MASK] } f32(map { $_ * INV2PI } @_) }
 
+# tcos LIST is fmath.Cos, the same lookup in the cosine table.
+sub tcos { map { $COS[int($_) & TAB_MASK] } f32(map { $_ * INV2PI } @_) }
+
 # tsin01 LIST is fmath.Sin01, for angles in turns. Multiplying a float32 by
 # 8192 is exact, so there is nothing to round.
 sub tsin01 { map { $SIN[int($_ * TAB_SIZE) & TAB_MASK] } @_ }
+
+# rng_next \$STATE advances an fmath.Rng, xorshift32, and returns the new
+# state. Perl's integers are 64-bit, so the left shifts are masked to 32.
+sub rng_next {
+    my $r = shift;
+    my $x = $$r;
+    $x ^= $x << 13 & 0xFFFFFFFF;
+    $x ^= $x >> 17;
+    $x ^= $x << 5 & 0xFFFFFFFF;
+    return $$r = $x;
+}
+
+# rng_f32 \$STATE is Rng.Float32: the top 24 bits over 2**24, exact in any
+# width.
+sub rng_f32 { (rng_next($_[0]) >> 8) / 16777216 }
+
+sub clamp01 { $_[0] < 0 ? 0 : $_[0] > 1 ? 1 : $_[0] }
+
+# from_float R, G, B is canvas.FromFloat: [0,1] floats to a packed colour
+sub from_float {
+    my ($r, $g, $b) = map { $_ <= 0 ? 0 : $_ >= 1 ? 255 : int($_ * 255 + 0.5) } @_;
+    return 0xFF000000 | $b << 16 | $g << 8 | $r;
+}
 
 # palette STOPS builds a 256-colour ramp (float64 maths, as in Go) from
 # [pos, r, g, b] stops, packed 0xAABBGGRR: R, G, B, A bytes in memory.

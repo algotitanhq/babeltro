@@ -44,7 +44,7 @@ some, the absence of a maths library.
 | x86 assembly | `ports/x86/` | NASM machine code on a tiny 386+SSE emulator in wasm | 8 |
 | JavaScript | `ports/js/` | plain ES modules, `Math.fround` everywhere | 9 |
 | Python | `ports/python/` | CPython + NumPy in wasm (Pyodide) | 9 |
-| Perl | `ports/perl/` | Perl 5.42 in wasm (zeroperl) | 3 |
+| Perl | `ports/perl/` | Perl 5.42 in wasm (zeroperl) | 9 |
 | SQL | `ports/sql/` | SQLite in wasm (sql.js), one query per frame | 4 |
 
 Every effect a port implements is byte-identical to the reference at every size and
