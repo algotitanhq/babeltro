@@ -43,7 +43,7 @@
           <canvas></canvas>
           <figcaption>
             <span class="who"></span>
-            <span class="cost" title="How long this language takes to compute one frame, measured inside its worker. A 60 Hz screen allows 16.7 ms per frame; the bar shows how much of that is used.">
+            <span class="cost" title="How long this language takes to compute one frame, measured inside its worker. A 60 Hz screen allows 16.7 ms per frame; the bar shows how much of that is used. It is WebAssembly time: it measures the compiler as much as the language.">
               <span class="ms"></span>
               <span class="bar"><i></i></span>
             </span>
@@ -53,7 +53,7 @@
           <canvas></canvas>
           <figcaption>
             <span class="who"></span>
-            <span class="cost" title="How long this language takes to compute one frame, measured inside its worker. A 60 Hz screen allows 16.7 ms per frame; the bar shows how much of that is used.">
+            <span class="cost" title="How long this language takes to compute one frame, measured inside its worker. A 60 Hz screen allows 16.7 ms per frame; the bar shows how much of that is used. It is WebAssembly time: it measures the compiler as much as the language.">
               <span class="ms"></span>
               <span class="bar"><i></i></span>
             </span>
@@ -97,6 +97,7 @@
         <h2>Every language, this effect</h2>
         <button id="race" class="wide">Measure them all</button>
         <ol id="raceOut"></ol>
+        <p class="hint" id="timingNote"></p>
       </section>
 
       <section class="about">

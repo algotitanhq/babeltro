@@ -1,4 +1,4 @@
-import { EFFECTS, LANGS, HOME } from './content.js';
+import { EFFECTS, LANGS, HOME, TIMING_NOTE } from './content.js';
 import { EXCERPTS, NOTES } from './excerpts.js';
 import { startLogo } from './logo.js';
 
@@ -344,7 +344,17 @@ async function race() {
   const rows = [];
   const draw = () => {
     const max = Math.max(...rows.map((r) => r.ms || 0), 0.001);
-    out.innerHTML = rows
+    // native Go, measured once outside the browser, for scale: it is not a
+    // row the lab runs, so it is drawn dimmed and only for the default step
+    const eff = EFFECTS[state.scene];
+    const native =
+      eff.native && stepOf(state.rung) === 0 && state.w === 640
+        ? `<li class="native" style="--c:#4fc3e8"><span class="rl">Go native</span>
+            <span class="rbar"><i style="width:${(eff.native / max) * 100}%"></i></span>
+            <span class="rms">${eff.native.toFixed(2)} ms</span>
+            <span class="rv">one thread on an M1, outside the browser</span></li>`
+        : '';
+    out.innerHTML = native + rows
       .map((r) => {
         const l = langOf(r.lang);
         const short = r.frames < RACE_FRAMES ? ` · stopped after ${r.frames} frames` : '';
@@ -364,6 +374,7 @@ async function race() {
   const langs = ['go', ...LANGS.map((l) => l.id).filter((id) => id !== 'go' && covers(id))];
   for (const lang of langs) rows.push({ lang });
   draw();
+  $('timingNote').hidden = false;
   $('race').disabled = true;
   try {
     await runRace(rows, key, draw);
@@ -478,6 +489,8 @@ function renderChrome() {
     raceKey = '';
     $('raceOut').innerHTML = '';
   }
+
+  $('timingNote').textContent = TIMING_NOTE;
 
   $('effName').textContent = eff.name;
   $('effTrick').textContent = eff.trick;

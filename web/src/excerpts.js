@@ -16,7 +16,9 @@ const portFiles = import.meta.glob(
   { query: '?raw', import: 'default', eager: true },
 );
 
-const sources = { go: import.meta.glob('../../go/internal/fx/*.go', { query: '?raw', import: 'default', eager: true }) };
+const goFiles = import.meta.glob('../../go/internal/fx/*.go', { query: '?raw', import: 'default', eager: true });
+// TinyGo builds the Go sources themselves, so it shows the same code
+const sources = { go: goFiles, tinygo: goFiles };
 for (const [path, text] of Object.entries(portFiles)) {
   const lang = path.split('/')[3];
   (sources[lang] ??= {})[path] = text;
