@@ -154,8 +154,7 @@ export const LANGS = [
     name: 'Python',
     color: '#5a9fd4',
     hl: 'python',
-    how: 'CPython and NumPy compiled to wasm (Pyodide), running in the worker.',
-    scenes: [1, 2, 7],
+    how: 'CPython and NumPy compiled to wasm (Pyodide). Loops for the ladder, arrays for speed.',
   },
   {
     id: 'perl',
