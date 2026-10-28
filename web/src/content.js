@@ -136,10 +136,10 @@ export const LANGS = [
   },
   {
     id: 'wat',
-    name: 'Hand-written wasm',
+    name: 'Raw WebAssembly',
     color: '#b48cff',
     hl: 'wasm',
-    how: 'Hand-written WAT, no compiler: its own sin, atan2 and exp, a 14.5 KB module.',
+    how: 'Written directly in WebAssembly text (WAT), no compiler: its own sin, atan2 and exp, 14.5 KB.',
   },
   {
     id: 'x86',

@@ -1,4 +1,4 @@
-;; babeltro, hand-written WebAssembly: the memory map
+;; babeltro in raw WebAssembly text: the memory map
 ;;
 ;; This port has no compiler. Every file in ports/wat/ is a list of module
 ;; fields (memory, globals, functions, exports) and build.sh wraps them in a

@@ -3,7 +3,7 @@
 ;; The texture is 512x512 u32 at 0x20000, built the first time the scene
 ;; starts and kept for the life of the module (it never depends on the
 ;; screen size). Building it takes about a million calls to $sin64: this is
-;; where a hand-written sine has to be good in f64, not just in f32.
+;; where a sine written from scratch has to be good in f64, not just in f32.
 
 (global $tex_ready (mut i32) (i32.const 0))
 

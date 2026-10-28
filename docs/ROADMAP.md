@@ -8,7 +8,7 @@ whoever picks it up — a person or an agent.
 - **The reference** (`go/`): nine effects, a wasm build with the port
   contract (`spec/ABI.md`), and the native demo it started as.
 - **Ports**: eleven besides Go — TinyGo, C, C++, Rust, Zig, AssemblyScript,
-  hand-written WebAssembly, JavaScript, Python, Perl, SQL — under `ports/`.
+  raw WebAssembly text (WAT), JavaScript, Python, Perl, SQL — under `ports/`.
   Every effect a port implements is byte-identical to the C reference; the finale differs
   only through the language's name and the layout that follows its width.
 - **Ladders**: the plasma, tunnel and Mandelbrot have optimisation steps

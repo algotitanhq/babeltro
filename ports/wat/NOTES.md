@@ -1,18 +1,18 @@
-# Hand-written WebAssembly port: notes
+# Raw WebAssembly (WAT) port: notes
 
 No compiler: the effects are written directly in the WebAssembly text format,
 one file per scene, and `build.sh` wraps them in one `(module ...)` for
 `wat2wasm`. Only multi-value and bulk memory are enabled. The memory map is at
 the top of `memory.wat`. All nine scenes, in a 14.5 KB module with no imports.
 
-## How hand-written WebAssembly differs, scene by scene
+## How raw WebAssembly differs, scene by scene
 
 - **STARFIELD**: the 1600 stars are 16-byte records at fixed offsets in
   scratch memory, read with `f32.load offset=4`, `offset=8`. The backdrop is
   built once and copied into the frame with one `memory.copy`. A Bresenham
   bounds test is one unsigned compare: a negative x, read unsigned, is huge.
 - **PLASMA**: no `sin` instruction exists, so `fmath.wat` builds the 8193-entry
-  tables at instantiation (the `start` function) with a hand-written Taylor
+  tables at instantiation (the `start` function) with a Taylor
   series behind a Cody-Waite range reduction. That costs a few hundred bytes
   where a data segment would cost 64 KiB, and all 8193 sin and 8193 cos
   entries equal Go's float32 tables bit for bit. The hot loop walks four
@@ -25,7 +25,7 @@ the top of `memory.wat`. All nine scenes, in a 14.5 KB module with no imports.
   `atan2` does not exist either: it is an octant fold plus a 21-term atan
   series whose coefficients are computed once into memory.
 - **TUNNEL/1**: the square root is the `f32.sqrt` instruction, correctly
-  rounded; the atan2 is the hand-written one, per pixel.
+  rounded; the atan2 is the port's own, per pixel.
 - **ROTOZOOM**: the 1 MiB texture lives at a fixed address and is built on
   first use with about a million `$sin64` calls; `math.Mod(x, 1)` is
   `x - f64.trunc(x)`, and `hsl2rgb` returns three values on the stack.
@@ -36,7 +36,7 @@ the top of `memory.wat`. All nine scenes, in a 14.5 KB module with no imports.
   Go writes out. Go's `Clamp01` on a float64 becomes `f64.min`/`f64.max`.
 - **FIRE**: the heat buffer is cleared with one `memory.fill`. Unsigned maths
   is spelled out: `i32.shr_u`, `i32.rem_u`, `i32.load8_u`.
-- **MANDELBROT**: `exp` is hand-written too (range reduction by ln2, Taylor
+- **MANDELBROT**: `exp` is the port's own too (range reduction by ln2, Taylor
   series, 2^k assembled from its exponent bits). Each block's first row is
   drawn and the rows under it are `memory.copy`'d.
 - **MANDELBROT/1**: the plain escape loop, a `block`/`loop` pair with `br_if`.
@@ -54,6 +54,6 @@ None. Every ported scene and rung matches the C reference exactly (0 differing p
 1 and 900, and at 333x211 on 1, 7 and 1000 (STARFIELD and GRID: 640x360,
 1280x720 and 160x90). In FINALE the logo and subtitle spell `WAT`, which also
 changes the logo's size and the layout. A scratch build spelling `C` matches
-the C finale exactly at 640x360, 1280x720 and 160x90. The hand-written `exp` differs
+the C finale exactly at 640x360, 1280x720 and 160x90. The port's own `exp` differs
 from Go's `math.Exp` by one ulp in 78 of the 2000 calls of frames 1..1000;
 none of the frames checked shows a pixel difference.

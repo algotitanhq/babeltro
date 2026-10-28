@@ -43,7 +43,7 @@ with no copy. The memory map is at the top of `main.asm`. All nine scenes.
   xorshift32 lives in `ebx` all frame, `r % 3` is a real `div`, the edge
   clamps are `cmov`s, and the buffer is cleared by a single `rep stosb`.
 - **MANDELBROT**: f64 throughout (`mulsd`, `addsd`, `comisd`); `exp` is
-  hand-written (reduction by ln2, Taylor series, 2^k built from its exponent
+  written from scratch (reduction by ln2, Taylor series, 2^k built from its exponent
   bits). Each block is filled with `rep stosd`, and the rung picks the
   iteration routine through a `call [M_FN]`.
 - **MANDELBROT/1**: the plain escape loop, z and its squares held in four

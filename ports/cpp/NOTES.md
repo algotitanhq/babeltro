@@ -11,7 +11,7 @@ a scene has a ladder (`-fno-rtti` rules out `dynamic_cast` anyway).
 
 Palettes and the font are `consteval`. The compiler builds them and the
 module carries only the finished tables. The sine tables are not, because
-libc++'s `std::sin` cannot run at compile time, and a hand-written series
+libc++'s `std::sin` cannot run at compile time, and a series written from scratch
 would be our own maths library, not the language's. They are built by
 `_initialize`, which runs the static initialisers. Build: `ports/cpp/build.sh`.
 The wasi-runtimes sysroot only has libc++, so libc comes from wasi-libc.

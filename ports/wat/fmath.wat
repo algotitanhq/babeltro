@@ -3,7 +3,7 @@
 ;; wasm's floating-point instructions stop at + - * / sqrt, abs, neg,
 ;; copysign, min, max, ceil, floor, trunc and nearest. There is no sin, no
 ;; cos, no atan2, no exp: the libm a compiler links into its .wasm is plain
-;; code made of those instructions. Here we write that code by hand: short
+;; code made of those instructions. Here that code is written directly: short
 ;; Taylor series behind a range reduction, in f64, which is far more than the
 ;; f32 tables and the 8-bit colours below need.
 ;;

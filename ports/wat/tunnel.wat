@@ -128,7 +128,7 @@
                                                         (f32.mul (local.get $dy) (local.get $dy))))
                                      (local.get $soft)))
                    (local.get $adv))
-          ;; v = atan2(dy, dx) in turns: a hand-written series, per pixel
+          ;; v = atan2(dy, dx) in turns: the port's own series, per pixel
           (call $angle_turns (local.get $dy) (local.get $dx))
           (local.get $spin)))
       (local.set $p (i32.add (local.get $p) (i32.const 4)))

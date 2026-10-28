@@ -1,6 +1,6 @@
 # babeltro
 
-**How do you make a plasma in Perl? A tunnel in SQL? A fire in hand-written
+**How do you make a plasma in Perl? A tunnel in SQL? A fire in raw
 WebAssembly?**
 
 Nine classic demoscene effects — starfield, tunnel, plasma, rotozoom,
@@ -40,7 +40,7 @@ some, the absence of a maths library.
 | Rust | `ports/rust/` | wasm32-unknown-unknown, no dependencies | 9 |
 | Zig | `ports/zig/` | wasm32-freestanding, comptime tables | 9 |
 | AssemblyScript | `ports/assemblyscript/` | asc, no imports | 9 |
-| WebAssembly, by hand | `ports/wat/` | hand-written WAT, its own sin/atan2/exp, 14.5 KB | 9 |
+| Raw WebAssembly | `ports/wat/` | written directly in WAT, no compiler; its own sin/atan2/exp, 14.5 KB | 9 |
 | x86 assembly | `ports/x86/` | NASM machine code on a tiny 386+SSE emulator in wasm | 9 |
 | JavaScript | `ports/js/` | plain ES modules, `Math.fround` everywhere | 9 |
 | Python | `ports/python/` | CPython + NumPy in wasm (Pyodide) | 9 |
@@ -62,7 +62,7 @@ A few things the ports found:
 - **x86 assembly runs on an emulator** written for the occasion: 22
   emulated instructions per plasma pixel, SSE only, because x87's 80-bit
   intermediates would break pixel identity.
-- **WebAssembly has no `sin`.** The hand-written port computes its sine table
+- **WebAssembly has no `sin`.** The raw WAT port computes its sine table
   with a Cody-Waite reduction and a Taylor series: all 8193 entries match
   Go's bit for bit.
 - **Perl matches too**, at a price: `unpack 'f', pack 'f'` after every

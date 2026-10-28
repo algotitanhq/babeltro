@@ -57,7 +57,7 @@
   (local $xEnd i32) (local $yEnd i32) (local $it i32) (local $c i32) (local $v f64)
   (local $idx i32) (local $row i32) (local $rowBytes i32)
   ;; Prepare: the camera slides onto the target fast, then the exponential
-  ;; zoom does the work. $exp is the hand-written one in fmath.wat.
+  ;; zoom does the work. $exp is the port's own, in fmath.wat.
   (local.set $u (f64.div (f64.min (local.get $t) (f64.const 14)) (f64.const 12)))
   (local.set $k (f64.sub (f64.const 1) (call $exp (f64.mul (f64.const -8) (local.get $u)))))
   (local.set $scale (f64.mul (f64.const 2.9)
