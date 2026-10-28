@@ -12,8 +12,8 @@ const slug = (name) => name.toLowerCase();
 const state = {
   view: 'home',
   scene: 2,
-  lang: 'go', // the main pane
-  other: null, // a second language on the same frames, or null
+  lang: 'c', // the language on screen; C is the reference
+  read: null, // a second language whose code is shown next to it, or null
   rung: 0, // ladder rung, 1..steps.length; ignored for scenes without one
   vsBest: false, // second pane: the same language at the last rung
   playing: true,
@@ -38,7 +38,6 @@ const rungOf = (step) => (step === 0 ? (steps()?.length ?? 0) : step);
 function spec(i) {
   if (i === 0) return { lang: state.lang, step: stepOf(state.rung) };
   if (state.vsBest && steps()) return { lang: state.lang, step: 0 };
-  if (state.other) return { lang: state.other, step: stepOf(state.rung) };
   return null;
 }
 
@@ -142,10 +141,10 @@ function exclusive(fn) {
   return run;
 }
 
-// sync makes every pane match its spec, keeping the frame on screen: a pane
-// that changes language or step replays up to the current frame, so the
-// switch shows the same instant.
+// sync makes every pane match its spec. Any change restarts the scene for
+// every pane: replaying to the frame on screen would take a minute in Perl.
 async function sync() {
+  let changed = false;
   for (const [i, p] of panes.entries()) {
     const s = spec(i);
     p.el.hidden = !s;
@@ -153,11 +152,15 @@ async function sync() {
       p.drop();
       continue;
     }
-    if (p.lang !== s.lang) await p.load(s.lang);
-    if (p.scene !== state.scene || p.step !== s.step) {
-      await p.start(state.scene, s.step);
-      if (state.n > 0) await p.render(state.n);
+    if (p.lang !== s.lang) {
+      await p.load(s.lang);
+      changed = true;
     }
+    if (p.scene !== state.scene || p.step !== s.step) changed = true;
+  }
+  if (changed) {
+    state.n = 0;
+    for (const [i, p] of panes.entries()) if (spec(i)) await p.start(state.scene, spec(i).step);
   }
   renderChrome();
   if (state.n > 0) present();
@@ -255,9 +258,14 @@ function caption(p) {
 
 // --- actions -------------------------------------------------------------
 
+let resized = false;
 const update = (fn) =>
   exclusive(async () => {
     fn();
+    if (resized) {
+      resized = false;
+      for (const p of active()) await p.init();
+    }
     await sync();
     if (!state.playing && state.n === 0) await advance();
   });
@@ -276,11 +284,17 @@ function selectLang(pane, lang) {
   return update(() => {
     if (pane === 0) {
       if (!lang) return;
-      if (state.other === lang) state.other = state.lang;
+      if (state.read === lang) state.read = null;
       state.lang = lang;
+      // a slow interpreter gets a small frame, or each one takes seconds
+      const res = langOf(lang).res;
+      if (res && state.w * state.h > res[0] * res[1]) {
+        [state.w, state.h] = res;
+        $('res').value = res.join('x');
+        resized = true;
+      }
     } else {
-      state.other = lang === state.lang ? null : lang;
-      if (lang) state.vsBest = false;
+      state.read = lang === state.lang ? null : lang;
     }
   });
 }
@@ -295,7 +309,6 @@ function selectRung(r) {
 function setVsBest(on) {
   return update(() => {
     state.vsBest = on;
-    if (on) state.other = null;
   });
 }
 
@@ -361,7 +374,7 @@ async function race() {
         const verdict =
           r.ms === undefined
             ? '…'
-            : (r.lang === 'go' ? 'reference' : r.diff === 0 ? 'same pixels' : `${r.diff.toLocaleString('en')} px differ`) + short;
+            : (r.lang === 'c' ? 'reference' : r.diff === 0 ? 'same pixels' : `${r.diff.toLocaleString('en')} px differ`) + short;
         return `<li style="--c:${l.color}">
           <span class="rl">${l.name}</span>
           <span class="rbar"><i style="width:${((r.ms || 0) / max) * 100}%"></i></span>
@@ -371,7 +384,7 @@ async function race() {
       })
       .join('');
   };
-  const langs = ['go', ...LANGS.map((l) => l.id).filter((id) => id !== 'go' && covers(id))];
+  const langs = ['c', ...LANGS.map((l) => l.id).filter((id) => id !== 'c' && covers(id))];
   for (const lang of langs) rows.push({ lang });
   draw();
   $('timingNote').hidden = false;
@@ -400,7 +413,7 @@ async function runRace(rows, key, draw) {
       while (n < RACE_FRAMES && (n < 5 || performance.now() - t0 < RACE_MS)) await p.render(++n);
       r.ms = p.ms();
       r.frames = n;
-      if (r.lang === 'go') {
+      if (r.lang === 'c') {
         // keep the reference going so a port that stopped early is compared
         // on the frame it reached
         ref = p;
@@ -452,10 +465,9 @@ function renderChrome() {
   };
   $('pickA').innerHTML = LANGS.map((l) => pill(0, l, state.lang === l.id)).join('');
   $('pickB').innerHTML = [
-    pill(1, null, !state.other),
-    ...LANGS.map((l) => pill(1, l, state.other === l.id)),
+    pill(1, null, !state.read),
+    ...LANGS.map((l) => pill(1, l, state.read === l.id)),
   ].join('');
-  $('compareHint').hidden = !!state.other;
 
   const st = eff.steps;
   $('ladder').hidden = !st;
@@ -503,7 +515,7 @@ let highlighter = null;
 
 function renderCode() {
   const eff = EFFECTS[state.scene];
-  const shown = [spec(0), spec(1)].filter(Boolean);
+  const shown = [spec(0), spec(1) ?? (state.read && { lang: state.read, step: stepOf(state.rung) })].filter(Boolean);
   $('code').innerHTML = shown
     .map((s) => {
       const l = langOf(s.lang);
@@ -514,7 +526,11 @@ function renderCode() {
       const kb = pane?.bytes ? ` · ${(pane.bytes / 1024).toFixed(0)} KB module` : '';
       const note =
         NOTES[s.lang]?.[key] ??
-        (s.lang === 'go' && !s.step ? 'The reference: every other language must match these pixels.' : '');
+        (s.lang === 'c' && !s.step
+          ? 'The reference: every other language must match these pixels.'
+          : s.lang === 'go' && !s.step
+            ? 'Where the effects were first written; every port was checked against it.'
+            : '');
       const label = eff.steps ? ` · step ${rung}: ${eff.steps[rung - 1].name}` : '';
       const body = !ex
         ? `<p class="missing">${l.name} has no excerpt for this ${eff.steps ? 'step' : 'effect'} yet.</p>`
@@ -584,7 +600,7 @@ function buildHome() {
 
   // the thumbnails come from the reference: at 256×144 even Go's slowest
   // scene costs about a millisecond, and the finale card then spells GO
-  const port = available.has('go') ? 'go' : null;
+  const port = available.has('c') ? 'c' : null;
   const canvases = [...$('cards').querySelectorAll('canvas')];
   if (!port || !canvases[0].transferControlToOffscreen) return;
   const offscreen = canvases.map((c) => c.transferControlToOffscreen());
@@ -651,7 +667,7 @@ document.addEventListener('keydown', (e) => {
     const id = LANGS[Number(e.code.slice(5)) - 1]?.id;
     if (!id) return;
     if (e.shiftKey) selectLang(0, id);
-    else selectLang(1, state.other === id ? null : id);
+    else selectLang(1, state.read === id ? null : id);
   }
 });
 

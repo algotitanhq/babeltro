@@ -163,6 +163,7 @@ export const LANGS = [
     hl: 'perl',
     how: 'Perl 5.42 (zeroperl) compiled to wasm; float32 rounded via pack \'f\'.',
     scenes: [1, 2, 6],
+    res: [160, 90], // an interpreter: the lab switches to this size
   },
   {
     id: 'sql',
@@ -171,6 +172,7 @@ export const LANGS = [
     hl: 'sql',
     how: 'SQLite → wasm via sql.js. Each frame is one blob from a query; float32 is emulated.',
     scenes: [1, 2, 6, 7],
+    res: [160, 90],
   },
 ];
 
@@ -183,4 +185,4 @@ export const HOME = {
 // will get wrong.
 export const TIMING_NOTE =
   'These are WebAssembly times in this browser: they measure each compiler’s wasm backend as much as the language. ' +
-  'The same Go code runs 1.5–3× faster built by TinyGo, and native Go is faster still.';
+  'The same Go code runs 1.5–3× faster built by TinyGo, and native Go is faster still. C is the reference the pixels are checked against.';

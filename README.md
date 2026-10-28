@@ -6,7 +6,7 @@ WebAssembly?**
 Nine classic demoscene effects — starfield, tunnel, plasma, rotozoom,
 metaballs, synthwave grid, fire, Mandelbrot, a logo card — written in twelve
 languages and run live, side by side, in your browser. Every pixel is
-computed on the CPU, and every port draws **the same pixels** as the Go
+computed on the CPU, and every port draws **the same pixels** as the C
 reference, bit for bit. Babel for the languages, "-tro" for the intro.
 
 ![The home page: the nine effects as live cards around the question "How do you make this effect in SQL?"](docs/screens/home.png)
@@ -18,23 +18,22 @@ some, the absence of a maths library.
 
 ## What is in the lab
 
-- **Two languages side by side** on the same frames, with a pixel count and
-  a diff view: grey where the pixels match, magenta where they do not.
-- **Each language's hot loop** under the canvases, with a one-line note on
-  what that language does differently.
+- **Each language's hot loop** under the canvas, next to a second language
+  of your choice, with a one-line note on what each does differently.
 - **Optimisation ladders** for the plasma, the tunnel and the Mandelbrot:
-  the naive version first, then one trick at a time, each rung comparable
-  with the last.
+  the naive version first, then one trick at a time; any rung can run next
+  to the last one, with a pixel diff: grey where they match, magenta where
+  they do not.
 - **A race**: every language on the current effect, timed, checked against
-  Go.
+  the reference.
 
 ## The languages
 
 | Language | Directory | How it gets into the browser | Effects |
 | --- | --- | --- | --- |
-| Go | `go/` | wasm, Go's own backend — **the reference** | 9 |
+| Go | `go/` | wasm, Go's own backend — where the effects were first written | 9 |
 | TinyGo | `ports/tinygo/` | the same Go files, compiled through LLVM | 9 |
-| C | `ports/c/` | clang + wasi-libc | 9 |
+| C | `ports/c/` | clang + wasi-libc — **the reference** | 9 |
 | C++ | `ports/cpp/` | clang + libc++, C++23 | 9 |
 | Rust | `ports/rust/` | wasm32-unknown-unknown, no dependencies | 9 |
 | Zig | `ports/zig/` | wasm32-freestanding, comptime tables | 9 |
@@ -45,7 +44,7 @@ some, the absence of a maths library.
 | Perl | `ports/perl/` | Perl 5.42 in wasm (zeroperl) | 3 |
 | SQL | `ports/sql/` | SQLite in wasm (sql.js), one query per frame | 4 |
 
-Every effect a port implements is byte-identical to Go at every size and
+Every effect a port implements is byte-identical to the reference at every size and
 rung tested. The one exception is by design: the finale spells the
 language's name, and its layout follows the name's width.
 
@@ -82,12 +81,12 @@ AssemblyScript, wabt); the Perl port fetches its interpreter with
 wasm and need nothing to build.
 
 Keys: `Space` pause, `←`/`→` effect, `.` one frame, `R` restart, `D`
-differences, `Esc` home.
+differences (ladders), `Esc` home.
 
 ## Checking a port
 
 ```sh
-node tools/check.mjs c rust js                    # every effect against Go
+node tools/check.mjs go rust js                   # every effect against C
 node tools/check.mjs --scene 2 --step 1 python    # one rung of a ladder
 node tools/check.mjs --png /tmp/diff --size 160x90 perl
 ```

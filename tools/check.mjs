@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// check compares ports against the Go reference, frame by frame, and times
+// check compares ports against the reference (C; --ref go for the original),
+// frame by frame, and times
 // them. It drives the same host code as the browser lab.
 //
 //   node tools/check.mjs c rust js                 every scene, default frames
@@ -22,7 +23,7 @@ import { SCENES, fromWasm, fromModule } from '../web/src/host/ports.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const args = process.argv.slice(2);
-const opt = { size: '640x360', at: '1,2,60,300', scene: null, step: '0', png: null };
+const opt = { size: '640x360', at: '1,2,60,300', scene: null, step: '0', png: null, ref: 'c' };
 const langs = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
@@ -103,7 +104,7 @@ function compare(a, b) {
 
 const median = (xs) => [...xs].sort((a, b) => a - b)[xs.length >> 1];
 
-const ref = await load('go');
+const ref = await load(opt.ref);
 ref.init(W, H);
 const ports = [];
 for (const lang of langs) {
@@ -113,8 +114,8 @@ for (const lang of langs) {
 }
 if (opt.png) mkdirSync(opt.png, { recursive: true });
 
-console.log(`${W}x${H}, frames ${checkpoints.join(',')}, step ${step}, reference go step ${refStep}\n`);
-console.log('lang  scene        frame   diff px   max  box                 go ms   port ms');
+console.log(`${W}x${H}, frames ${checkpoints.join(',')}, step ${step}, reference ${opt.ref} step ${refStep}\n`);
+console.log(`lang  scene        frame   diff px   max  box             ${opt.ref.padStart(6)} ms   port ms`);
 let failed = 0;
 for (const { lang, p } of ports) {
   for (const s of scenes) {
