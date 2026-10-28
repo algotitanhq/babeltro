@@ -346,13 +346,22 @@ static void run(uint32_t entry, uint32_t a, uint32_t d)
         case 0x8B: modrm(); r[reg_field] = get_rm32(); break;
         case 0x8D: modrm(); r[reg_field] = ea; break; // lea
         case 0xA1: r[EAX] = rd32(f32()); break;
+        case 0xA2: wr8(f32(), (uint8_t)r[EAX]); break;
         case 0xA3: wr32(f32(), r[EAX]); break;
         case 0xC6: modrm(); if (is_reg) trap("mov r8, imm8", at); else wr8(ea, f8()); break;
         case 0xC7: modrm(); set_rm32(f32()); break;
-        case 0xC1: { // shl / shr / sar r/m32, imm8 (only ZF and SF are kept)
+        case 0x99: r[EDX] = (uint32_t)((int32_t)r[EAX] >> 31); break; // cdq
+        case 0x69: case 0x6B: { // imul r32, r/m32, imm
+            modrm();
+            int32_t a = (int32_t)get_rm32();
+            int32_t imm = op == 0x69 ? (int32_t)f32() : (int8_t)f8();
+            r[reg_field] = (uint32_t)(int32_t)((int64_t)a * imm);
+            break;
+        }
+        case 0xC1: case 0xD1: { // shl / shr / sar r/m32, imm8 or 1 (only ZF and SF are kept)
             modrm();
             uint32_t v = get_rm32();
-            int s = f8() & 31;
+            int s = op == 0xD1 ? 1 : f8() & 31;
             switch (reg_field) {
             case 4: v <<= s; break;
             case 5: v >>= s; break;
@@ -378,6 +387,15 @@ static void run(uint32_t entry, uint32_t a, uint32_t d)
                 }
                 r[EAX] = (uint32_t)(n / dv);
                 r[EDX] = (uint32_t)(n % dv);
+            } else if (reg_field == 7) { // idiv: truncates toward zero, like C
+                int32_t dv = (int32_t)get_rm32();
+                int64_t n = (int64_t)((uint64_t)r[EDX] << 32 | r[EAX]);
+                if (dv == 0 || n / dv > INT32_MAX || n / dv < INT32_MIN) {
+                    trap("divide error", at);
+                    return;
+                }
+                r[EAX] = (uint32_t)(int32_t)(n / dv);
+                r[EDX] = (uint32_t)(int32_t)(n % dv);
             } else {
                 trap("unknown F7 instruction", at);
                 return;

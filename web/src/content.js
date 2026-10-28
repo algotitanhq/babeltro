@@ -147,7 +147,6 @@ export const LANGS = [
     color: '#e86f8a',
     hl: 'asm',
     how: 'NASM-assembled x86 machine code, run by a tiny 386+SSE emulator compiled to wasm.',
-    scenes: [0, 1, 2, 3, 4, 5, 6, 7],
     res: [320, 180], // emulated: 22 instructions per pixel, at 125 M a second
   },
   {

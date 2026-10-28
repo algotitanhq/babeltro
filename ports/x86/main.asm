@@ -132,8 +132,8 @@ init:
         mov     eax, [FB]
         ret
 
-; start(eax = scene): begin a scene from a fresh state. A scene this port
-; does not have draws nothing.
+; start(eax = scene): begin a scene from a fresh state. A scene with
+; nothing to prepare (metaballs, grid) starts at `nothing`.
 start:
         mov     [SCENE], eax
         mov     dword [STEP], 0
@@ -165,9 +165,9 @@ nothing:
 
 ; one start and one render per scene, by number
 starts:  dd starfield_start, tunnel_start, plasma_start, rotozoom_start
-         dd nothing, nothing, fire_start, mandel_start, nothing
+         dd nothing, nothing, fire_start, mandel_start, finale_start
 renders: dd starfield_render, tunnel_render, plasma_render, rotozoom_render
-         dd metaballs_render, grid_render, fire_render, mandel_render, nothing
+         dd metaballs_render, grid_render, fire_render, mandel_render, finale_render
 
 %include "fmath.asm"
 %include "palette.asm"
@@ -179,6 +179,8 @@ renders: dd starfield_render, tunnel_render, plasma_render, rotozoom_render
 %include "metaballs.asm"
 %include "grid.asm"
 %include "starfield.asm"
+%include "finale.asm"
+%include "font.asm"
 
 ; ---------------------------------------------------------------------------
 ; constants

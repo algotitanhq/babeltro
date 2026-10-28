@@ -1,13 +1,12 @@
 # x86 assembly port: notes
 
 The demoscene's own language. The effects are 32-bit x86 assembly (NASM
-syntax, flat protected mode), assembled by `nasm -f bin` into a 12 KB raw
+syntax, flat protected mode), assembled by `nasm -f bin` into a 17 KB raw
 image. A browser cannot run that, so `cpu.c` is a small 386+SSE interpreter
 compiled to wasm: it decodes only the instructions the program uses and
 stops with a message on anything else. The emulated machine's 32 MiB live
 inside wasm memory, so the lab reads the framebuffer the x86 code wrote,
-with no copy. The memory map is at the top of `main.asm`. Eight scenes;
-FINALE is not ported (it draws nothing).
+with no copy. The memory map is at the top of `main.asm`. All nine scenes.
 
 ## How x86 assembly differs, scene by scene
 
@@ -51,13 +50,22 @@ FINALE is not ported (it draws nothing).
   xmm registers.
 - **MANDELBROT/2**: the cardioid and bulb tests, then a `jmp` into the plain
   loop.
+- **FINALE**: the 5x7 font is the one table shipped as data (`font.asm`,
+  `db` rows). One walker visits a glyph's lit dots and calls a block
+  handler through `call [T_FN]`: solid, gradient with scanlines, or the
+  additive reflection, whose rows run upward by giving the walker a negative
+  row step. Signed layout maths uses `cdq`/`idiv`, and `/2` is the classic
+  `cdq; sub eax, edx; sar eax, 1`. The name is a NASM `%define`.
 
 ## Pixel differences
 
-None. Every ported scene and rung matches C exactly (0 differing pixels) at
-640x360 on frames 1, 60 and 300, and every scene at 160x90 on 1, 2, 60 and
-300 and at 1280x720 on 1 and 600. Instructions retired per frame at
+Only the name. Every scene and rung matches C exactly (0 differing pixels)
+at 640x360 on frames 1, 60 and 300, and every scene but the finale at
+160x90 on 1, 2, 60 and 300 and at 1280x720 on 1 and 600. FINALE differs
+only inside the wordmark and its reflection, which spell `X86`; a scratch
+build spelling `C` (`X86_LANG=C OUT=... ports/x86/build.sh`) matches the C
+finale exactly at 640x360 and 160x90. Instructions retired per frame at
 640x360 (frame 300): STARFIELD 0.5 M, TUNNEL 11.1 M (rung 1: 42.7 M),
 PLASMA 5.1 M (73.3 M, 12.0 M), ROTOZOOM 5.5 M, METABALLS 24.5 M, GRID
-19.8 M, FIRE 8.1 M, MANDELBROT 12.7 M (357.6 M, 48.7 M). The emulator runs
-some 125 emulated MIPS: a 486 would have been proud.
+19.8 M, FIRE 8.1 M, MANDELBROT 12.7 M (357.6 M, 48.7 M), FINALE 4.0 M. The
+emulator runs some 125 emulated MIPS: a 486 would have been proud.

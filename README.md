@@ -41,7 +41,7 @@ some, the absence of a maths library.
 | Zig | `ports/zig/` | wasm32-freestanding, comptime tables | 9 |
 | AssemblyScript | `ports/assemblyscript/` | asc, no imports | 9 |
 | WebAssembly, by hand | `ports/wat/` | hand-written WAT, its own sin/atan2/exp, 14.5 KB | 9 |
-| x86 assembly | `ports/x86/` | NASM machine code on a tiny 386+SSE emulator in wasm | 8 |
+| x86 assembly | `ports/x86/` | NASM machine code on a tiny 386+SSE emulator in wasm | 9 |
 | JavaScript | `ports/js/` | plain ES modules, `Math.fround` everywhere | 9 |
 | Python | `ports/python/` | CPython + NumPy in wasm (Pyodide) | 9 |
 | Perl | `ports/perl/` | Perl 5.42 in wasm (zeroperl) | 9 |
