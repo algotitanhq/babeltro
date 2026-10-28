@@ -4,9 +4,10 @@
 
 import { fromWasm, fromModule } from './host/ports.js';
 
-// A glob rather than a plain import, so the lab still builds before the
-// JavaScript port exists.
-const jsPort = Object.values(import.meta.glob('../../js/babeltro.js'))[0];
+// Every JavaScript-hosted port, loaded only when a pane asks for it: some
+// bring an interpreter of several megabytes.
+const modules = import.meta.glob('../../ports/*/port.js');
+const moduleOf = (lang) => modules[`../../ports/${lang}/port.js`];
 
 let port = null;
 let w = 0;
@@ -27,8 +28,8 @@ async function handle(msg) {
   switch (msg.type) {
     case 'load': {
       let bytes = 0;
-      if (msg.lang === 'js') {
-        port = fromModule(await jsPort());
+      if (moduleOf(msg.lang)) {
+        port = await fromModule(await moduleOf(msg.lang)());
       } else {
         const buf = await (await fetch(msg.url)).arrayBuffer();
         bytes = buf.byteLength;
@@ -54,7 +55,7 @@ async function handle(msg) {
       let ms = 0;
       for (let n = msg.from; n <= msg.n; n++) {
         const t = performance.now();
-        port.render(n);
+        await port.render(n);
         ms = performance.now() - t;
       }
       const pixels = port.pixels().slice().buffer;

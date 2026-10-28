@@ -15,7 +15,7 @@ evaluation order, the maths library.
 ```sh
 cd web
 npm install
-npm run wasm      # builds go.wasm, c.wasm, rust.wasm into web/public/wasm
+../scripts/build-all.sh   # builds every wasm port into web/public/wasm
 npm run dev
 ```
 
@@ -32,18 +32,20 @@ differences, `1`–`4` compare with a language, `Shift`+`1`–`4` main language.
 | Directory | Language | How it runs in the browser | Pixels vs Go |
 | --- | --- | --- | --- |
 | `go/` | Go | wasm (`GOOS=wasip1`, reactor) — the reference | — |
-| `c/` | C17 | wasm via clang + wasi-libc | identical ¹ |
-| `rust/` | Rust | wasm32-unknown-unknown, no dependencies | identical ¹ |
-| `js/` | JavaScript | plain ES modules, no wasm | identical ¹ |
+| `ports/c/` | C17 | wasm via clang + wasi-libc | identical ¹ |
+| `ports/rust/` | Rust | wasm32-unknown-unknown, no dependencies | identical ¹ |
+| `zig/` | Zig | wasm32-freestanding, comptime tables | identical ¹ |
+| `ports/js/` | JavaScript | plain ES modules, no wasm | identical ¹ |
 | `goose/` | Goose | test bench, PLASMA only, native (see `goose/RESULTS.md`) | — |
 
 ¹ Every scene at every size tested, except the finale, which spells the
 language's name: the logo's size follows the name's width, and the card is
 laid out around it.
 
-Each port has a `NOTES.md` with what it does differently, scene by scene. The
-contract every port follows is `spec/ABI.md`. `go/` also still builds the
-original native demo (window, HUD, worker pool): see `go/README.md`.
+Each port has a `NOTES.md` with what it does differently, scene by scene.
+The contract every port follows, and how to add a language, is
+`spec/ABI.md`. `go/` also still builds the original native demo (window,
+HUD, worker pool): see `go/README.md`.
 
 ## Checking a port
 

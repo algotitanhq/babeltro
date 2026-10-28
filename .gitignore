@@ -6,4 +6,8 @@
 node_modules/
 /web/dist/
 /web/public/wasm/
-/rust/target/
+/ports/*/target/
+/ports/*/zig-out/
+/ports/*/.zig-cache/
+/zig/zig-out/
+/zig/.zig-cache/

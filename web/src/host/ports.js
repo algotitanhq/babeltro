@@ -49,9 +49,17 @@ export async function fromWasm(source, log) {
   };
 }
 
-// fromModule wraps the JavaScript port, whose framebuffer is a plain
-// Uint32Array it owns.
-export function fromModule(mod) {
+// fromModule wraps a JavaScript-hosted port: ports/<lang>/port.js. That is
+// the JavaScript port itself, and every language that brings its own
+// interpreter compiled to wasm (Python, Perl, SQL…). Such a module exports
+//   load()                 optional, async: fetch and start the interpreter
+//   scenes                 optional: the scene numbers it implements
+//   init(w, h)             returns the framebuffer, a Uint32Array
+//   start(scene), step(n)  as in the wasm contract
+//   render(n)              may return a promise
+// and may set framebuffer() if the array it draws into can change.
+export async function fromModule(mod) {
+  await mod.load?.();
   let fb = null;
   return {
     init(w, h) {
@@ -61,6 +69,7 @@ export function fromModule(mod) {
     start: (scene) => mod.start(scene),
     step: (n) => mod.step?.(n),
     render: (n) => mod.render(n),
-    pixels: () => fb,
+    pixels: () => mod.framebuffer?.() ?? fb,
+    scenes: mod.scenes,
   };
 }

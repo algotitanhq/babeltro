@@ -9,9 +9,11 @@
 //   node tools/check.mjs --scene 2 --step 1 --ref-step 3 go
 //                                                   a rung against the optimised one
 //
-// Ports are read from web/public/wasm/<lang>.wasm, except js (js/babeltro.js).
+// A port is ports/<lang>/port.js if that exists (JavaScript-hosted), else
+// web/public/wasm/<lang>.wasm. A port that lists its `scenes` is checked on
+// those only.
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -39,10 +41,8 @@ const refStep = opt['ref-step'] === undefined ? step : Number(opt['ref-step']);
 const scenes = opt.scene === null ? SCENES.map((_, i) => i) : [Number(opt.scene)];
 
 async function load(lang) {
-  if (lang === 'js') {
-    const mod = await import(pathToFileURL(join(root, 'js/babeltro.js')).href);
-    return fromModule(mod);
-  }
+  const modPath = join(root, 'ports', lang, 'port.js');
+  if (existsSync(modPath)) return fromModule(await import(pathToFileURL(modPath).href));
   const bytes = readFileSync(join(root, 'web/public/wasm', `${lang}.wasm`));
   return fromWasm(bytes, (line) => console.error(`[${lang}] ${line}`));
 }
@@ -118,6 +118,7 @@ console.log('lang  scene        frame   diff px   max  box                 go ms
 let failed = 0;
 for (const { lang, p } of ports) {
   for (const s of scenes) {
+    if (p.scenes && !p.scenes.includes(s)) continue;
     ref.start(s);
     p.start(s);
     ref.step(refStep);
@@ -128,7 +129,7 @@ for (const { lang, p } of ports) {
       ref.render(n);
       tRef.push(performance.now() - t);
       t = performance.now();
-      p.render(n);
+      await p.render(n);
       tPort.push(performance.now() - t);
       if (!checkpoints.includes(n)) continue;
       const a = ref.pixels(), b = p.pixels();

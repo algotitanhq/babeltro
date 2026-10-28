@@ -17,11 +17,32 @@ A WebAssembly port exports:
 | `bb_start` | `(scene: i32) -> ()` | begin `scene` from a fresh state |
 | `bb_render` | `(n: i32) -> ()` | draw frame `n` of the current scene into the framebuffer |
 
-A port may import the `wasi_snapshot_preview1` functions the host shim
+A port may also export `bb_step(n: i32)`: the rung of the scene's
+optimisation ladder, called after `bb_start` (0, the default, is the
+optimised version). A port may import the `wasi_snapshot_preview1` functions the host shim
 provides (`web/src/host/wasi.js`). None of them may influence the pixels.
 
-The JavaScript port is an ES module exporting `init(w, h) -> Uint32Array`
-(the framebuffer itself), `start(scene)` and `render(n)`.
+A port that runs as JavaScript — the JavaScript port itself, or any
+language that brings its own interpreter compiled to wasm (Python, Perl,
+SQL…) — is instead an ES module at `ports/<lang>/port.js` exporting:
+
+| Export | Meaning |
+| --- | --- |
+| `load()` | optional, async: fetch and start the interpreter |
+| `scenes` | optional: the scene numbers the port implements (default: all) |
+| `init(w, h)` | allocate the framebuffer and return it, a `Uint32Array` |
+| `start(scene)`, `step(n)`, `render(n)` | as above; `render` may return a promise |
+| `framebuffer()` | optional: the current framebuffer, if it can change |
+
+## Layout of a port
+
+`ports/<lang>/` holds the sources, a `NOTES.md` (one bullet per scene,
+`- **SCENE**: text`, which the lab shows above the code) and either a
+`build.sh` writing `web/public/wasm/<lang>.wasm` or a `port.js`. Each effect
+marks its hot loop between `@excerpt SCENE` and `@end` comments (rungs of
+a ladder: `@excerpt SCENE/k`). The lab also needs an entry in
+`web/src/content.js` (`LANGS`): name, colour, highlighter grammar, one
+line on how it reaches the browser, and `scenes` for a partial port.
 
 ## Pixels
 

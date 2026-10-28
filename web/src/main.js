@@ -24,6 +24,10 @@ const state = {
 };
 
 const available = new Set();
+// a language covers a scene unless its LANGS entry lists the ones it has
+const covers = (id, scene = state.scene) => available.has(id) && (!langOf(id)?.scenes || langOf(id).scenes.includes(scene));
+// JavaScript-hosted ports: present when ports/<lang>/port.js exists
+const modulePorts = Object.keys(import.meta.glob('../../ports/*/port.js')).map((p) => p.split('/')[3]);
 
 const steps = () => EFFECTS[state.scene].steps;
 // the port's step number for a rung: the last rung is the default, 0
@@ -268,7 +272,7 @@ function selectScene(i) {
 }
 
 function selectLang(pane, lang) {
-  if (lang && !available.has(lang)) return;
+  if (lang && !covers(lang)) return;
   return update(() => {
     if (pane === 0) {
       if (!lang) return;
@@ -328,6 +332,7 @@ function toggleDiff(on = !state.diff) {
 // so they do not compete for the CPU, on the same 120 frames; it reports the
 // median time per frame and whether the last frame matches Go's.
 const RACE_FRAMES = 120;
+const RACE_MS = 4000; // a slow interpreter stops early: at least 5 frames, at most 4 s
 let raceKey = '';
 
 async function race() {
@@ -342,8 +347,11 @@ async function race() {
     out.innerHTML = rows
       .map((r) => {
         const l = langOf(r.lang);
+        const short = r.frames < RACE_FRAMES ? ` · stopped after ${r.frames} frames` : '';
         const verdict =
-          r.ms === undefined ? '…' : r.lang === 'go' ? 'reference' : r.diff === 0 ? 'same pixels' : `${r.diff.toLocaleString('en')} px differ`;
+          r.ms === undefined
+            ? '…'
+            : (r.lang === 'go' ? 'reference' : r.diff === 0 ? 'same pixels' : `${r.diff.toLocaleString('en')} px differ`) + short;
         return `<li style="--c:${l.color}">
           <span class="rl">${l.name}</span>
           <span class="rbar"><i style="width:${((r.ms || 0) / max) * 100}%"></i></span>
@@ -353,7 +361,7 @@ async function race() {
       })
       .join('');
   };
-  const langs = ['go', ...LANGS.map((l) => l.id).filter((id) => id !== 'go' && available.has(id))];
+  const langs = ['go', ...LANGS.map((l) => l.id).filter((id) => id !== 'go' && covers(id))];
   for (const lang of langs) rows.push({ lang });
   draw();
   $('race').disabled = true;
@@ -376,15 +384,35 @@ async function runRace(rows, key, draw) {
     try {
       await p.load(r.lang);
       await p.start(state.scene, stepOf(state.rung));
-      for (let n = 1; n <= RACE_FRAMES; n++) await p.render(n);
+      const t0 = performance.now();
+      let n = 0;
+      while (n < RACE_FRAMES && (n < 5 || performance.now() - t0 < RACE_MS)) await p.render(++n);
       r.ms = p.ms();
-      if (r.lang === 'go') ref = p.pixels;
-      else r.diff = ref ? compare(ref, p.pixels).n : undefined;
+      r.frames = n;
+      if (r.lang === 'go') {
+        // keep the reference going so a port that stopped early is compared
+        // on the frame it reached
+        ref = p;
+        draw();
+        continue;
+      }
+      r.diff = ref ? await diffAt(ref, p, n) : undefined;
     } finally {
-      p.drop();
+      if (p !== ref) p.drop();
     }
     draw();
   }
+  ref?.drop();
+}
+
+// diffAt compares port p, at frame n, with the reference pane replayed to
+// the same frame (the reference raced first and ran furthest)
+async function diffAt(ref, p, n) {
+  if (ref.drawn !== n) {
+    await ref.start(state.scene, stepOf(state.rung));
+    await ref.render(n);
+  }
+  return compare(ref.pixels, p.pixels).n;
 }
 
 // --- chrome: everything around the canvases ------------------------------
@@ -402,10 +430,14 @@ function renderChrome() {
 
   const pill = (pane, l, on) => {
     if (!l) return `<button role="radio" data-pane="${pane}" data-lang="" aria-checked="${on}">none</button>`;
-    const off = !available.has(l.id) || (pane === 1 && state.lang === l.id);
+    const off = !covers(l.id) || (pane === 1 && state.lang === l.id);
+    const why = !available.has(l.id)
+      ? 'Not built yet'
+      : !covers(l.id)
+        ? `${l.name} only does ${l.scenes.map((i) => EFFECTS[i].name.toLowerCase()).join(', ')} so far`
+        : l.how;
     return `<button role="radio" data-pane="${pane}" data-lang="${l.id}" aria-checked="${on}"
-      style="--c:${l.color}" ${off ? 'disabled' : ''}
-      title="${available.has(l.id) ? l.how : 'Not built yet'}">${l.name}</button>`;
+      style="--c:${l.color}" ${off ? 'disabled' : ''} title="${why}">${l.name}</button>`;
   };
   $('pickA').innerHTML = LANGS.map((l) => pill(0, l, state.lang === l.id)).join('');
   $('pickB').innerHTML = [
@@ -614,12 +646,12 @@ document.addEventListener('keydown', (e) => {
 async function main() {
   // a language is offered only once its module is actually there
   await Promise.all(
-    LANGS.filter((l) => l.id !== 'js').map(async (l) => {
+    LANGS.filter((l) => !modulePorts.includes(l.id)).map(async (l) => {
       const r = await fetch(wasmUrl(l.id), { method: 'HEAD' }).catch(() => null);
       if (r?.ok && !r.headers.get('content-type')?.includes('text/html')) available.add(l.id);
     }),
   );
-  if (Object.keys(EXCERPTS.js).length) available.add('js');
+  for (const id of modulePorts) available.add(id);
 
   buildHome();
   await route();

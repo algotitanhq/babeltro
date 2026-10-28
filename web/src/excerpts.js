@@ -3,13 +3,26 @@
 // `@excerpt <SCENE>` and a line holding `@end`. A scene with an optimisation
 // ladder also marks each earlier rung as `@excerpt <SCENE>/<k>`.
 
-const sources = {
-  go: import.meta.glob('../../go/internal/fx/*.go', { query: '?raw', import: 'default', eager: true }),
-  c: import.meta.glob('../../c/**/*.c', { query: '?raw', import: 'default', eager: true }),
-  rust: import.meta.glob('../../rust/src/**/*.rs', { query: '?raw', import: 'default', eager: true }),
-  zig: import.meta.glob('../../zig/src/**/*.zig', { query: '?raw', import: 'default', eager: true }),
-  js: import.meta.glob('../../js/**/*.js', { query: '?raw', import: 'default', eager: true }),
-};
+// Port sources live in ports/<lang>/; the language is the directory name.
+const portFiles = import.meta.glob(
+  [
+    '../../ports/*/**/*.{c,h,cpp,hpp,rs,zig,js,mjs,ts,py,pl,pm,lua,rb,wat,sql,glsl,frag}',
+    '!../../ports/*/**/node_modules/**',
+    '!../../ports/*/target/**',
+    '!../../ports/*/zig-out/**',
+    '!../../ports/*/.zig-cache/**',
+    '!../../ports/*/vendor/**',
+  ],
+  { query: '?raw', import: 'default', eager: true },
+);
+
+const sources = { go: import.meta.glob('../../go/internal/fx/*.go', { query: '?raw', import: 'default', eager: true }) };
+for (const [path, text] of Object.entries(portFiles)) {
+  const lang = path.split('/')[3];
+  (sources[lang] ??= {})[path] = text;
+}
+// the Zig port has not moved under ports/ yet
+Object.assign((sources.zig ??= {}), import.meta.glob('../../zig/src/**/*.zig', { query: '?raw', import: 'default', eager: true }));
 
 function extract(files) {
   const out = {};
@@ -49,7 +62,7 @@ export const EXCERPTS = Object.fromEntries(
 // Each port's NOTES.md has one bullet per scene, `- **SCENE**: text`, on how
 // that language approaches it differently from Go. The lab shows the bullet
 // above the excerpt.
-const notes = import.meta.glob('../../{c,rust,zig,js}/NOTES.md', { query: '?raw', import: 'default', eager: true });
+const notes = import.meta.glob(['../../ports/*/NOTES.md', '../../zig/NOTES.md'], { query: '?raw', import: 'default', eager: true });
 
 export const NOTES = {};
 for (const [path, text] of Object.entries(notes)) {

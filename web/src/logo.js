@@ -4,8 +4,8 @@
 // reuses the JavaScript port's text code, so it is the demo's pixels, not a
 // web font pretending.
 
-import { Framebuffer } from '../../js/lib/canvas.js';
-import { textWidth, textHeight, drawTextGradient, drawTextOutline, drawTextReflect } from '../../js/lib/text.js';
+import { Framebuffer } from '../../ports/js/lib/canvas.js';
+import { textWidth, textHeight, drawTextGradient, drawTextOutline, drawTextReflect } from '../../ports/js/lib/text.js';
 
 const TOP = 0xfffff6e8; // pale cream
 const MID = 0xff7c9cff; // hot rose

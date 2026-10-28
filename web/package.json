@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "wasm": "../scripts/build-go.sh && (test ! -x ../scripts/build-c.sh || ../scripts/build-c.sh) && (test ! -x ../scripts/build-rust.sh || ../scripts/build-rust.sh)",
+    "wasm": "../scripts/build-all.sh",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
