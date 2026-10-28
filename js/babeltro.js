@@ -4,6 +4,7 @@
 //
 //   init(w, h)    allocate the framebuffer and return it (a Uint32Array)
 //   start(scene)  begin a scene from a fresh state
+//   step(n)       optional: pick a rung of the scene's optimisation ladder
 //   render(n)     draw frame n of the current scene
 //
 // Every effect is a class with the same three methods, the shape of Go's
@@ -51,6 +52,15 @@ export function init(w, h) {
 export function start(scene) {
   effect = (SCENES[scene] ?? SCENES[SCENES.length - 1])();
   effect.resize(fb.w, fb.h);
+}
+
+/**
+ * Picks rung n of the current scene's optimisation ladder, for the scenes
+ * that have one; 0 is the optimised default. Called after start, before the
+ * first render.
+ */
+export function step(n) {
+  effect.setStep?.(n);
 }
 
 /** Draws frame n (n ≥ 1). Time comes from n at a fixed 60 Hz step, never a clock. */

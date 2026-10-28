@@ -27,6 +27,15 @@ arithmetic, is the one scene clearly slower than Go's wasm.
 - **PLASMA**: the pixel loop reads `SIN_TAB` inline rather than through
   `sin()`: the helper call, though inlined by V8, made the loop about 2.8x
   slower (2.5 ms against 0.9 ms).
+- **PLASMA/1**: `Math.sin` on a float32 argument, each result wrapped in
+  `f32` like Go's `sin32`. It matches Go pixel for pixel at 640x360,
+  1280x720, 1920x1080 and 333x187: whatever V8's and Go's sines differ by does
+  not survive the float32 rounding and the 256-level quantisation. It is about
+  2x faster than Go's wasm (10 ms against 22 ms at 640x360): wasm has no sine
+  instruction, so Go's `math.Sin` is software, while V8's is native code.
+- **PLASMA/2**: calling the table `sin()` helper four times per pixel costs
+  5.7 ms, against Go's 1.7 ms: the helper-call cost described above, paid
+  four times per pixel.
 - **ROTOZOOM**: the row terms `dy*sinA` and `dy*cosA` are hoisted. The values
   are the same, so the pixels are too. The texture's `math.Mod` is JS `%`,
   which also takes the sign of the dividend.
@@ -52,8 +61,9 @@ arithmetic, is the one scene clearly slower than Go's wasm.
 
 None outside the language name. All eight non-text scenes are byte-identical to
 Go at 640x360 (frames 1, 2, 60, 300), 1280x720 (1, 600), 1920x1080 (1, 900)
-and 333x187. V8's `Math.sin`, `Math.cos`, `Math.atan2` and `Math.exp` caused no
-difference: wherever their results feed the image they are rounded to float32
+and 333x187, and so is every rung of the PLASMA, TUNNEL and MANDELBROT
+ladders at 640x360. V8's `Math.sin`, `Math.cos`, `Math.atan2` and `Math.exp`
+caused no difference: wherever their results feed the image they are rounded to float32
 or quantised to a byte first.
 
 FINALE differs from Go over most of the card, not just the wordmark. The logo

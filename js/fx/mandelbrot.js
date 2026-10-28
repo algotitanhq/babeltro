@@ -15,6 +15,14 @@ export class Mandelbrot {
     this.scale = 0;
     this.maxIter = 192;
     this.step = 2;
+    // the ladder: 1 iterates every pixel with no shortcut, 2 adds the closed
+    // form test for the cardioid and the bulb, 3 (the default) also renders
+    // on blocks of step×step pixels
+    this.rung = 0;
+  }
+
+  setStep(n) {
+    this.rung = n;
   }
 
   resize(w, h) {
@@ -40,17 +48,26 @@ export class Mandelbrot {
 
   draw(fb) {
     const { w, h, pix } = fb;
-    const { step, maxIter, scale } = this;
+    const { maxIter, scale } = this;
+    let step = this.step;
+    let iter = mandelIter;
+    if (this.rung === 1) {
+      step = 1;
+      iter = mandelIterPlain;
+    } else if (this.rung === 2) {
+      step = 1;
+    }
     const asp = h / w;
     const x0 = this.cx - scale * 0.5;
     const y0 = this.cy - scale * 0.5 * asp;
     const d = scale / w; // plane units per pixel
 
+    // @excerpt MANDELBROT
     for (let by = 0; by < h; by += step) {
       const ci = y0 + by * d;
       const yEnd = Math.min(by + step, h);
       for (let bx = 0; bx < w; bx += step) {
-        const it = mandelIter(x0 + bx * d, ci, maxIter);
+        const it = iter(x0 + bx * d, ci, maxIter);
         // the ramp is anchored to a fixed iteration count, not to maxIter,
         // so raising the budget for a deep zoom does not darken the picture
         const c = it >= maxIter ? INSIDE : paletteAt(ICE, Math.min(Math.sqrt(it / 40), 1) * 0.92 + 0.04);
@@ -58,10 +75,11 @@ export class Mandelbrot {
         for (let yy = by; yy < yEnd; yy++) pix.fill(c, yy * w + bx, yy * w + xEnd);
       }
     }
+    // @end
   }
 }
 
-// @excerpt MANDELBROT
+// @excerpt MANDELBROT/2
 function mandelIter(cx, cy, max) {
   // cheap escape test for the main cardioid and the period-2 bulb
   const x = cx - 0.25;
@@ -71,6 +89,22 @@ function mandelIter(cx, cy, max) {
   if ((cx + 1) * (cx + 1) + y2 <= 0.0625) return max;
 
   // z = z² + c, keeping the squares for the escape test
+  let zx = 0, zy = 0, zx2 = 0, zy2 = 0;
+  for (let i = 0; i < max; i++) {
+    zy = 2 * zx * zy + cy;
+    zx = zx2 - zy2 + cx;
+    zx2 = zx * zx;
+    zy2 = zy * zy;
+    if (zx2 + zy2 > 4) return i;
+  }
+  return max;
+}
+// @end
+
+// mandelIterPlain is the escape-time loop and nothing else: every point
+// inside the set runs the full budget before it gives up.
+// @excerpt MANDELBROT/1
+function mandelIterPlain(cx, cy, max) {
   let zx = 0, zy = 0, zx2 = 0, zy2 = 0;
   for (let i = 0; i < max; i++) {
     zy = 2 * zx * zy + cy;
