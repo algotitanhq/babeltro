@@ -1,0 +1,7 @@
+.{
+    .name = .babeltro,
+    .version = "0.0.0",
+    .fingerprint = 0x2ccf86183d2b661d,
+    .minimum_zig_version = "0.17.0",
+    .paths = .{ "build.zig", "build.zig.zon", "src" },
+}
