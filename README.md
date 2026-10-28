@@ -70,6 +70,8 @@ A few things the ports found:
 - **The Pythonic plasma is not a loop**: the NumPy version is 100–250× faster
   than the plain-Python rungs.
 
+![An effect page: the plasma in x86 assembly, its code next to Rust's, the optimisation steps on the right](docs/screens/lab.png)
+
 Each port's `NOTES.md` says what it does differently, effect by effect.
 
 ## Running it
