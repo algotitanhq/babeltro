@@ -544,9 +544,9 @@ const escapeHtml = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;
 // Where each card sits around the question, in % of the page, and its tilt.
 // Hand-placed: a scatter, not a grid.
 const SCATTER = [
-  [13, 20, -5], [38, 13, 3], [63, 15, -2], [87, 22, 5],
-  [10, 55, 4], [90, 56, -4],
-  [17, 86, 3], [50, 88, -3], [83, 85, 2],
+  [22, 26, -5], [41, 20, 3], [60, 22, -2], [78, 28, 5],
+  [20, 54, 4], [80, 55, -4],
+  [25, 80, 3], [50, 82, -3], [75, 79, 2],
 ];
 
 let thumbs = null;
@@ -568,7 +568,8 @@ function buildHome() {
   const q = $('qlang');
   q.textContent = langs[0].name;
   q.style.color = langs[0].color;
-  // fast: the list will grow long, and the point is that it keeps going
+  // fast, like a slot machine: the list is long, and the point is that it
+  // keeps going
   setInterval(() => {
     if (state.view !== 'home') return;
     k = (k + 1) % langs.length;
@@ -577,7 +578,7 @@ function buildHome() {
     q.classList.remove('flip');
     void q.offsetWidth; // restart the animation
     q.classList.add('flip');
-  }, 650);
+  }, 200);
 
   startLogo($('logo'), 'BABELTRO', () => state.view === 'home');
 

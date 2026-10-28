@@ -111,7 +111,7 @@ body.is-lab {
 }
 .question .in { white-space: nowrap; }
 .question b { display: inline-block; transition: color 0.2s; }
-.question b.flip { animation: flip 0.25s ease-out; }
+.question b.flip { animation: flip 0.14s ease-out; }
 @keyframes flip {
   from { transform: translateY(-0.35em) rotateX(70deg); opacity: 0.2; }
   to { transform: none; opacity: 1; }
