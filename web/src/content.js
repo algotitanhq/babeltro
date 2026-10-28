@@ -130,9 +130,9 @@ export const LANGS = [
   {
     id: 'assemblyscript',
     name: 'AssemblyScript',
-    color: '#3db6c8',
+    color: '#9b6dff',
     hl: 'typescript',
-    how: 'TypeScript-shaped, compiled straight to wasm by asc.',
+    how: 'TypeScript syntax compiled to wasm by asc. Real f32 and f64 types, so no Math.fround.',
   },
   {
     id: 'wat',

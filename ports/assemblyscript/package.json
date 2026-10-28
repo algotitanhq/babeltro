@@ -1,0 +1,9 @@
+{
+  "name": "babeltro-assemblyscript",
+  "private": true,
+  "description": "babeltro's effects in AssemblyScript, compiled to WebAssembly",
+  "type": "module",
+  "devDependencies": {
+    "assemblyscript": "0.28.20"
+  }
+}
