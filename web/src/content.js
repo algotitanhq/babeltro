@@ -146,8 +146,8 @@ export const LANGS = [
     name: 'Perl',
     color: '#d06bd4',
     hl: 'perl',
-    how: 'A Perl 5 interpreter compiled to wasm.',
-    scenes: [2],
+    how: 'Perl 5.42 (zeroperl) compiled to wasm; float32 rounded via pack \'f\'.',
+    scenes: [1, 2, 6],
   },
   {
     id: 'sql',
