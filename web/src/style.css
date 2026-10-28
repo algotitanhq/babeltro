@@ -45,9 +45,10 @@ a { color: inherit; }
   color: transparent;
 }
 .tagline { margin: 0; color: var(--dim); font-size: 13px; flex: 1; }
-.links { display: flex; gap: 14px; font-size: 13px; }
-.links a, .credit a { color: var(--dim); text-decoration: none; }
-.links a:hover, .credit a:hover { color: var(--text); text-decoration: underline; }
+.gh { color: var(--dim); display: flex; align-self: center; }
+.gh:hover { color: var(--text); }
+.credit a { color: var(--dim); text-decoration: none; }
+.credit a:hover { color: var(--text); text-decoration: underline; }
 .question .credit { margin-top: 14px; font-size: 13px; }
 .back { font-size: 13px; color: var(--dim); text-decoration: none; }
 .back::before { content: '← '; }
