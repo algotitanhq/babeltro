@@ -28,6 +28,15 @@ one row in flight. Wherever Go has a float32 operation, there is a rounding.
 
 ## How SQL differs, scene by scene
 
+- **STARFIELD**: 1600 stars in a table, moved by one `REPLACE INTO` per
+  frame. A star that passes the camera respawns with two fresh random
+  numbers, and "the k-th star reborn this frame takes calls 2k-1 and 2k" is
+  a window function again. The streaks are Bresenham lines, all 1600 walked
+  at once by one recursive CTE (a row is a star at one point of its line,
+  with its error term). Additive drawing has no order in SQL, so the frame is
+  what painting in order would leave: per pixel, the last head pixel written
+  there, plus the sum of the lines drawn after it, saturated once (saturating
+  adds of non-negative values commute).
 - **TUNNEL**: the float32 emulation done the plain way: 17 roundings per
   pixel, in nine stacked co-routines. It costs about 2.5x the same query in
   plain double (`--step 3`, not a Go rung), which differs from Go on about 5
@@ -54,6 +63,20 @@ one row in flight. Wherever Go has a float32 operation, there is a rounding.
 - **PLASMA/2**: the same per-pixel arithmetic with four joins on the sine
   table instead of four `sin()`. In SQL a table lookup is a B-tree seek, not
   an array index, which is why this rung is slower than the previous one.
+- **ROTOZOOM**: the 512x512 texture is float64 maths, built once into a
+  table (its HSL ramp is a CASE per channel; `math.Mod(v, 1)` is
+  `v - CAST(v AS INTEGER)`, which is exact). Per frame, `dx*cosA`, `dx*sinA`
+  and their `dy` twins go into a column table and a row table, so each pixel
+  does four float32 roundings per axis and one seek into the texture.
+- **METABALLS**: the squared distances to the six balls split into a column
+  term and a row term, each a six-column table rebuilt every frame. Per
+  pixel stay the 24 roundings of the six divisions and the running float32
+  sum, in ball order, across ten stacked subqueries.
+- **GRID**: the scene where Go mixes float32 and float64 the most, every
+  conversion written out (Clamp01 in float64, colours in float32). All the
+  per-row work Go hoists lands in a per-frame row table; per pixel remain
+  the sun's disk, behind an `iif` on the row's kind so the square root runs
+  only on sun rows, and the floor's cross lines.
 - **FIRE**: the one scene that is not a set. Each pixel draws a random number
   only if the pixel below still burns, so which number it gets depends on
   every pixel computed before it. The loop over rows is a trigger: inserting
@@ -72,11 +95,22 @@ one row in flight. Wherever Go has a float32 operation, there is a rounding.
   test: a configuration row, not new code.
 - **MANDELBROT/2**: the cardioid and bulb test is a `WHERE NOT skip` on the
   CTE's seed: the points inside the set never enter the queue.
+- **FINALE**: painting in layers becomes "which layer is on top of this
+  pixel": every overwriting layer (outline, chrome gradient, rules,
+  subtitle, numbers, tag) is a set of `(id, layer, colour)` rows, and
+  `max(layer)` with SQLite's bare-column rule picks the colour. Under it, the
+  additive layers (glow, stars, the reflection) are sums, saturated, and the
+  floor line is the one float32 step in between. The 5x7 font is a table of
+  lit dots, and text is a join: characters × dots × scale² blocks.
 
 ## Pixel differences
 
-None. All four scenes match Go byte for byte at 160x90, 320x180 and
-640x360 (frames 1, 2, 30), and every rung of the three ladders at 160x90.
+None outside the language name. Eight scenes match the reference byte for
+byte at 160x90 and 320x180 (frames 1, 2, 30); TUNNEL, PLASMA, FIRE and
+MANDELBROT also at 640x360, and every rung of the PLASMA and TUNNEL ladders at 160x90.
+FINALE differs only where it spells `SQL`: the logo, its outline and
+reflection, and the subtitle. The same finale.sql with the name set to `C`
+matches the C reference at 160x90 and 320x180, and with `GO` it matches Go.
 At 640x360 the fire has thousands of dead pixels per frame, so the
 data-dependent random draws are exercised too.
 

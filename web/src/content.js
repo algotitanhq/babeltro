@@ -178,7 +178,6 @@ export const LANGS = [
     color: '#c9cfd8',
     hl: 'sql',
     how: 'SQLite → wasm via sql.js. Each frame is one blob from a query; float32 is emulated.',
-    scenes: [1, 2, 6, 7],
     res: [160, 90],
   },
 ];

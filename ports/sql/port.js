@@ -21,10 +21,15 @@ import initSqlJs from 'sql.js';
 // it into the URL of an emitted asset when it bundles the lab's worker.
 const FILES = {
   tables: new URL('./tables.sql', import.meta.url),
+  0: new URL('./starfield.sql', import.meta.url),
   1: new URL('./tunnel.sql', import.meta.url),
   2: new URL('./plasma.sql', import.meta.url),
+  3: new URL('./rotozoom.sql', import.meta.url),
+  4: new URL('./metaballs.sql', import.meta.url),
+  5: new URL('./grid.sql', import.meta.url),
   6: new URL('./fire.sql', import.meta.url),
   7: new URL('./mandelbrot.sql', import.meta.url),
+  8: new URL('./finale.sql', import.meta.url),
 };
 // sql.js ships sql-wasm.wasm for Node and sql-wasm-browser.wasm for
 // bundlers; the two files are byte-identical (1.14.2), so one serves both.
@@ -40,7 +45,7 @@ async function text(url) {
   return (await fetch(url)).text();
 }
 
-export const scenes = [1, 2, 6, 7];
+export const scenes = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
 let db = null;
 const sources = {};

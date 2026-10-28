@@ -1,0 +1,14 @@
+-- FINALE: the closing card of go/internal/fx/finale.go, as the browser lab
+-- draws it (no HUD panel; the tag says ONE THREAD - NO GPU - NO SHADER),
+-- with the language's name, SQL, as the wordmark.
+--
+-- Go paints in layers, one over the other. SQL has no "over": each layer is
+-- a set of pixels, and the frame is the per-pixel answer to "which layer is
+-- on top, and what was added under it". The 5x7 font is a table of lit dots;
+-- text is a join of strings, glyphs and scale×scale blocks.
+-- float32 operations are rounded with f32(v) = v*S - (v*S - v), S = 2^29+1.
+
+-- @run resize
+-- The font: one row per character, seven rows of five dots.
+CREATE TABLE IF NOT EXISTS font_src (ch TEXT PRIMARY KEY, rows TEXT);
+DELETE FROM font_src;

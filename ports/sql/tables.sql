@@ -18,13 +18,14 @@ INSERT INTO nums
   WITH RECURSIVE c(n) AS (SELECT 0 UNION ALL SELECT n + 1 FROM c WHERE n < 8191)
   SELECT n FROM c;
 
--- sintab: Go's fmath.SinTab, 8192 float32 sines of a full turn. The sine is
--- the one sql.js compiles in (extension-functions.c, C libm), rounded to
--- float32 like Go's float32(math.Sin(a)).
-CREATE TABLE sintab (i INTEGER PRIMARY KEY, s REAL);
+-- sintab: Go's fmath.SinTab and CosTab, 8192 float32 sines and cosines of
+-- a full turn. sin() and cos() are the ones sql.js compiles in
+-- (extension-functions.c, C libm), rounded to float32 like Go's
+-- float32(math.Sin(a)).
+CREATE TABLE sintab (i INTEGER PRIMARY KEY, s REAL, c REAL);
 INSERT INTO sintab
-  SELECT n, s * 536870913.0 - (s * 536870913.0 - s)
-  FROM (SELECT n, sin(2 * pi() * n / 8192) AS s FROM nums);
+  SELECT n, s * 536870913.0 - (s * 536870913.0 - s), c * 536870913.0 - (c * 536870913.0 - c)
+  FROM (SELECT n, sin(2 * pi() * n / 8192) AS s, cos(2 * pi() * n / 8192) AS c FROM nums);
 
 -- stops: the colour anchors of go/internal/palette, one row each.
 CREATE TABLE stops (pal TEXT, k INTEGER, pos REAL, r REAL, g REAL, b REAL);

@@ -35,8 +35,8 @@ whoever picks it up — a person or an agent.
   box per ball), fire (gather vs scatter), rotozoom (incremental stepping
   along a row instead of a multiply per pixel).
 - **More languages**: Odin, Nim, Swift (wasm), Lua, Ruby, Fortran, COBOL, a
-  GLSL fragment shader as the "cheating with the GPU" entry; the partial
-  ports (WAT, Perl, SQL) could cover more effects. Each one needs a
+  GLSL fragment shader as the "cheating with the GPU" entry; the x86 port
+  still lacks the finale. Each one needs a
   build script writing `web/public/wasm/<lang>.wasm`, an entry in
   `web/src/content.js`, and a passing checker run.
 - **Parallelism chapter**: the native demo's band pool versus what each

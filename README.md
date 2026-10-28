@@ -45,7 +45,7 @@ some, the absence of a maths library.
 | JavaScript | `ports/js/` | plain ES modules, `Math.fround` everywhere | 9 |
 | Python | `ports/python/` | CPython + NumPy in wasm (Pyodide) | 9 |
 | Perl | `ports/perl/` | Perl 5.42 in wasm (zeroperl) | 9 |
-| SQL | `ports/sql/` | SQLite in wasm (sql.js), one query per frame | 4 |
+| SQL | `ports/sql/` | SQLite in wasm (sql.js), one query per frame | 9 |
 
 Every effect a port implements is byte-identical to the reference at every size and
 rung tested. The one exception is by design: the finale spells the
