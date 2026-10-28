@@ -321,6 +321,71 @@ function toggleDiff(on = !state.diff) {
   if (state.n) present();
 }
 
+// --- the race: every language on the same scene and step ---------------
+
+// race runs each built language in a worker of its own, one after the other
+// so they do not compete for the CPU, on the same 120 frames; it reports the
+// median time per frame and whether the last frame matches Go's.
+const RACE_FRAMES = 120;
+let raceKey = '';
+
+async function race() {
+  const wasPlaying = state.playing;
+  if (wasPlaying) togglePlay();
+  const key = `${state.scene}/${state.rung}/${state.w}x${state.h}`;
+  raceKey = key;
+  const out = $('raceOut');
+  const rows = [];
+  const draw = () => {
+    const max = Math.max(...rows.map((r) => r.ms || 0), 0.001);
+    out.innerHTML = rows
+      .map((r) => {
+        const l = langOf(r.lang);
+        const verdict =
+          r.ms === undefined ? '…' : r.lang === 'go' ? 'reference' : r.diff === 0 ? 'same pixels' : `${r.diff.toLocaleString('en')} px differ`;
+        return `<li style="--c:${l.color}">
+          <span class="rl">${l.name}</span>
+          <span class="rbar"><i style="width:${((r.ms || 0) / max) * 100}%"></i></span>
+          <span class="rms">${r.ms === undefined ? '' : `${r.ms.toFixed(2)} ms`}</span>
+          <span class="rv ${r.diff ? 'differ' : ''}">${verdict}</span>
+        </li>`;
+      })
+      .join('');
+  };
+  const langs = ['go', ...LANGS.map((l) => l.id).filter((id) => id !== 'go' && available.has(id))];
+  for (const lang of langs) rows.push({ lang });
+  draw();
+  $('race').disabled = true;
+  try {
+    await runRace(rows, key, draw);
+  } finally {
+    $('race').disabled = false;
+    if (wasPlaying && !state.playing) togglePlay();
+  }
+}
+
+async function runRace(rows, key, draw) {
+  let ref = null;
+  for (const r of rows) {
+    if (raceKey !== key) break; // the scene changed under us
+    // an off-screen pane: same worker protocol, never shown
+    const fig = document.createElement('figure');
+    fig.append(document.createElement('canvas'));
+    const p = new Pane(fig);
+    try {
+      await p.load(r.lang);
+      await p.start(state.scene, stepOf(state.rung));
+      for (let n = 1; n <= RACE_FRAMES; n++) await p.render(n);
+      r.ms = p.ms();
+      if (r.lang === 'go') ref = p.pixels;
+      else r.diff = ref ? compare(ref, p.pixels).n : undefined;
+    } finally {
+      p.drop();
+    }
+    draw();
+  }
+}
+
 // --- chrome: everything around the canvases ------------------------------
 
 function renderChrome() {
@@ -374,6 +439,12 @@ function renderChrome() {
     who.textContent = st ? `${l.name} · step ${rungOf(s.step)}` : l.name;
     who.style.color = l.color;
   });
+
+  const key = `${state.scene}/${state.rung}/${state.w}x${state.h}`;
+  if (key !== raceKey) {
+    raceKey = '';
+    $('raceOut').innerHTML = '';
+  }
 
   $('effName').textContent = eff.name;
   $('effTrick').textContent = eff.trick;
@@ -499,6 +570,7 @@ $('play').onclick = togglePlay;
 $('step').onclick = step;
 $('restart').onclick = () => selectScene(state.scene);
 $('diff').onchange = (e) => toggleDiff(e.target.checked);
+$('race').onclick = race;
 $('vsBest').onchange = (e) => setVsBest(e.target.checked);
 $('res').onchange = (e) => setResolution(e.target.value);
 window.addEventListener('hashchange', route);

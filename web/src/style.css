@@ -281,6 +281,33 @@ body.is-lab {
 .legend i.same { background: #444; }
 .legend i.differ { background: #ff40ff; margin-left: 8px; }
 
+.wide {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 13px;
+}
+.wide:hover { border-color: var(--dim); }
+.wide:disabled { opacity: 0.5; cursor: default; }
+.race ol { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.race li {
+  display: grid;
+  grid-template-columns: 78px 1fr 62px;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 8px;
+  font: 12px var(--mono);
+}
+.race .rl { color: var(--c); font-weight: 600; }
+.race .rbar { height: 6px; border-radius: 3px; background: #ffffff10; overflow: hidden; }
+.race .rbar i { display: block; height: 100%; background: var(--c); }
+.race .rms { text-align: right; color: var(--text); }
+.race .rv { grid-column: 2 / 4; font-size: 11px; color: var(--ok); }
+.race .rv.differ { color: var(--bad); }
+
 .about h2 { color: var(--text); font-size: 13px; letter-spacing: 0.08em; }
 .about p { margin: 0 0 6px; color: var(--dim); font-size: 13px; }
 .about .trick { color: var(--accent); font: 12px var(--mono); }
