@@ -54,7 +54,7 @@ export const EFFECTS = [
     name: 'FINALE',
     seconds: 14, // the scene loops after this, as in the demo
     trick: 'Bitmap font · gradient · reflection',
-    text: 'A 5×7 font scaled up block by block, a three-stop gradient, an additive reflection. Its name is the only thing that differs between languages.',
+    text: 'A 5×7 font scaled up block by block, a three-stop gradient, an additive reflection. Only the name differs between languages, but the layout follows its width.',
   },
 ];
 
