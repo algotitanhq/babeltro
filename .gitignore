@@ -9,5 +9,3 @@ node_modules/
 /ports/*/target/
 /ports/*/zig-out/
 /ports/*/.zig-cache/
-/zig/zig-out/
-/zig/.zig-cache/

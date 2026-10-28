@@ -34,7 +34,7 @@ differences, `1`–`4` compare with a language, `Shift`+`1`–`4` main language.
 | `go/` | Go | wasm (`GOOS=wasip1`, reactor) — the reference | — |
 | `ports/c/` | C17 | wasm via clang + wasi-libc | identical ¹ |
 | `ports/rust/` | Rust | wasm32-unknown-unknown, no dependencies | identical ¹ |
-| `zig/` | Zig | wasm32-freestanding, comptime tables | identical ¹ |
+| `ports/zig/` | Zig | wasm32-freestanding, comptime tables | identical ¹ |
 | `ports/js/` | JavaScript | plain ES modules, no wasm | identical ¹ |
 | `goose/` | Goose | test bench, PLASMA only, native (see `goose/RESULTS.md`) | — |
 

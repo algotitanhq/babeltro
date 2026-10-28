@@ -8,18 +8,39 @@ const palette = @import("palette.zig");
 const State = @import("fx.zig").State;
 
 step: usize,
+// the ladder: 1 iterates every pixel with no shortcut, 2 adds the closed-form
+// test for the cardioid and the bulb, 3 and 0 (the default) also render on
+// blocks of step x step pixels
+rung: i32,
 
 const Mandelbrot = @This();
 
 pub fn start(m: *Mandelbrot, _: std.mem.Allocator, w: usize, _: usize) !void {
     // keep the block size constant in screen terms as the window grows
     m.step = if (w > 1600) 3 else 2;
+    m.rung = 0;
 }
 
+pub fn setStep(m: *Mandelbrot, n: i32) void {
+    m.rung = n;
+}
+
+/// The iteration function is a comptime parameter, not a run-time function
+/// value: each rung gets its own copy of the block loop with its function
+/// called directly (and inlined), where Go and C call through a pointer.
+const IterFn = fn (cx: f64, cy: f64, max: u32) u32;
+
 pub fn render(m: *Mandelbrot, fb: canvas.FB, st: State) void {
+    switch (m.rung) {
+        1 => drawBlocks(iteratePlain, fb, st, 1),
+        2 => drawBlocks(iterate, fb, st, 1),
+        else => drawBlocks(iterate, fb, st, m.step),
+    }
+}
+
+fn drawBlocks(comptime iter: IterFn, fb: canvas.FB, st: State, step: usize) void {
     const w = fb.w;
     const h = fb.h;
-    const step = m.step;
 
     const t = @min(st.beat, 14);
     const u = t / 12;
@@ -51,7 +72,7 @@ pub fn render(m: *Mandelbrot, fb: canvas.FB, st: State) void {
         var x: usize = 0;
         while (x < w) : (x += step) {
             const cx = x0 + @as(f64, @floatFromInt(x)) * d;
-            const it = iterate(cx, cy, max_iter);
+            const it = iter(cx, cy, max_iter);
             const c: u32 = if (it >= max_iter) 0xFF0A0812 else c: {
                 // the ramp is anchored to a fixed iteration count, not to
                 // max_iter, so raising the budget for a deep zoom does not
@@ -66,7 +87,27 @@ pub fn render(m: *Mandelbrot, fb: canvas.FB, st: State) void {
     // @end
 }
 
+/// The escape-time loop and nothing else: every point inside the set runs
+/// the full budget before it gives up.
+// @excerpt MANDELBROT/1
+fn iteratePlain(cx: f64, cy: f64, max: u32) u32 {
+    var zx: f64 = 0;
+    var zy: f64 = 0;
+    var zx2: f64 = 0;
+    var zy2: f64 = 0;
+    for (0..max) |i| {
+        zy = 2 * zx * zy + cy;
+        zx = zx2 - zy2 + cx;
+        zx2 = zx * zx;
+        zy2 = zy * zy;
+        if (zx2 + zy2 > 4) return @intCast(i);
+    }
+    return max;
+}
+// @end
+
 /// The escape time of c = cx + i*cy, or max if it never escapes.
+// @excerpt MANDELBROT/2
 fn iterate(cx: f64, cy: f64, max: u32) u32 {
     // cheap escape test for the main cardioid and the period-2 bulb
     const x = cx - 0.25;
@@ -88,3 +129,4 @@ fn iterate(cx: f64, cy: f64, max: u32) u32 {
     }
     return max;
 }
+// @end

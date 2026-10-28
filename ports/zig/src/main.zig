@@ -48,6 +48,13 @@ export fn bb_start(scene: i32) void {
     effect.begin(tag, arena.allocator(), fb.w, fb.h) catch @panic("out of memory");
 }
 
+/// Picks a rung of the current scene's optimisation ladder, for the scenes
+/// that have one; 0 is the optimised default. Called after bb_start, before
+/// the first frame.
+export fn bb_step(n: i32) void {
+    effect.setStep(n);
+}
+
 /// Draws frame n (n >= 1) of the current scene.
 export fn bb_render(n: i32) void {
     effect.render(fb, fx.State.at(@intCast(n)));

@@ -21,8 +21,7 @@ for (const [path, text] of Object.entries(portFiles)) {
   const lang = path.split('/')[3];
   (sources[lang] ??= {})[path] = text;
 }
-// the Zig port has not moved under ports/ yet
-Object.assign((sources.zig ??= {}), import.meta.glob('../../zig/src/**/*.zig', { query: '?raw', import: 'default', eager: true }));
+
 
 function extract(files) {
   const out = {};
@@ -62,7 +61,7 @@ export const EXCERPTS = Object.fromEntries(
 // Each port's NOTES.md has one bullet per scene, `- **SCENE**: text`, on how
 // that language approaches it differently from Go. The lab shows the bullet
 // above the excerpt.
-const notes = import.meta.glob(['../../ports/*/NOTES.md', '../../zig/NOTES.md'], { query: '?raw', import: 'default', eager: true });
+const notes = import.meta.glob('../../ports/*/NOTES.md', { query: '?raw', import: 'default', eager: true });
 
 export const NOTES = {};
 for (const [path, text] of Object.entries(notes)) {

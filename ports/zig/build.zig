@@ -31,6 +31,6 @@ pub fn build(b: *std.Build) void {
     const wasm = b.addExecutable(.{ .name = "babeltro", .root_module = root });
     wasm.entry = .disabled; // a reactor: no main, the host calls the exports
     // export exactly the ABI; memory is exported by default
-    root.export_symbol_names = &.{ "bb_init", "bb_start", "bb_render" };
+    root.export_symbol_names = &.{ "bb_init", "bb_start", "bb_step", "bb_render" };
     b.installArtifact(wasm);
 }

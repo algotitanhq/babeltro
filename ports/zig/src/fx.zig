@@ -4,6 +4,8 @@
 //!     start(self, arena, w, h) !void   build the tables, from a fresh state
 //!     render(self, fb, state) void     draw one whole frame
 //!
+//! The scenes with an optimisation ladder also have setStep(self, n).
+//!
 //! Effect is a tagged union of them, and `inline else` turns a call on the
 //! union into a switch over the nine concrete calls at compile time: no
 //! vtable, no function pointer, and a scene missing either function is a
@@ -49,6 +51,16 @@ pub const Effect = union(enum(u8)) {
                 e.* = @unionInit(Effect, @tagName(t), undefined);
                 try @field(e, @tagName(t)).start(arena, w, h);
             },
+        }
+    }
+
+    /// Picks a rung of the scene's optimisation ladder, 0 being the default.
+    /// Go asks at run time whether the effect implements fx.Stepped; here
+    /// @hasDecl asks at compile time, so the scenes without a ladder compile
+    /// to nothing.
+    pub fn setStep(e: *Effect, n: i32) void {
+        switch (e.*) {
+            inline else => |*scene| if (@hasDecl(@TypeOf(scene.*), "setStep")) scene.setStep(n),
         }
     }
 

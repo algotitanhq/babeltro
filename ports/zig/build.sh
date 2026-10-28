@@ -6,10 +6,10 @@
 # on them. Extra arguments go to `zig build`: -Doptimize=safe keeps every
 # check (it wins over --release), -Dlang=GO renames the finale's language.
 set -eu
-root=$(cd "$(dirname "$0")/.." && pwd)
+root=$(cd "$(dirname "$0")/../.." && pwd)
 zig=${ZIG:-zig}
 command -v "$zig" >/dev/null || zig=/opt/homebrew/bin/zig
 mkdir -p "$root/web/public/wasm"
-cd "$root/zig"
+cd "$root/ports/zig"
 "$zig" build --release=fast "$@"
 cp zig-out/bin/babeltro.wasm "$root/web/public/wasm/zig.wasm"
