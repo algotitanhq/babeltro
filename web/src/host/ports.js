@@ -9,14 +9,16 @@ export const SCENES = [
   'GRID', 'FIRE', 'MANDELBROT', 'FINALE',
 ];
 
-// fromWasm instantiates a port from its bytes. Every export is looked up
-// once; the framebuffer view is rebuilt whenever memory grows, because
-// growing detaches the old ArrayBuffer.
-export async function fromWasm(bytes, log) {
+// fromWasm instantiates a port from its bytes, or from a compiled
+// WebAssembly.Module when several instances share one compilation. The
+// framebuffer view is rebuilt whenever memory grows, because growing
+// detaches the old ArrayBuffer.
+export async function fromWasm(source, log) {
   let memory;
-  const { instance } = await WebAssembly.instantiate(bytes, {
+  const result = await WebAssembly.instantiate(source, {
     wasi_snapshot_preview1: wasiImports(() => memory, log),
   });
+  const instance = result.instance ?? result;
   const ex = instance.exports;
   memory = ex.memory;
   if (ex._initialize) ex._initialize();

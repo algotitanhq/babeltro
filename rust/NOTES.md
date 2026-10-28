@@ -14,6 +14,16 @@ wasm it is a plain static plus one borrow-flag check per call.
   tables, so there is no index and nothing to bounds-check.
 - **PLASMA**: `chunks_exact_mut(w)` plus `zip` with equal-length slices
   removes every bounds check from the pixel loop.
+- **PLASMA/1**: the sines are `f64::sin` rounded to f32, as in Go. Rust's
+  libm and Go's `math` differ in the last f64 bit for some angles, but no
+  difference survives the rounding: 0 differing pixels at 640×360 and
+  1280×720. The more natural `f32::sin` (libm's `sinf`) also gave 0
+  differing pixels at 640×360, and ran in 5.8 ms instead of 8.6 ms.
+- **PLASMA/2**: the `fb.pix[y * w + x]` index keeps one bounds check per
+  pixel; the palette index needs none, as the clamp to 0..=255 proves it in
+  range for a `[u32; 256]`. Iterating rows with `chunks_exact_mut` instead
+  took 3.55 ms down to about 3.2 ms at 1280×720: the check costs about 10%,
+  far less than the sines.
 - **ROTOZOOM**: the texture is a `Box<[u32; 512*512]>`, not a `Vec`, so its
   length is a compile-time fact and the masked index needs no check.
   `* zoom * 34` stays two multiplies, as in Go, because folding them would
@@ -32,6 +42,10 @@ wasm it is a plain static plus one borrow-flag check per call.
   there is no clamped block loop. Go folds `-0.743643887037151+0.5` exactly
   at compile time, while Rust rounds the literal first; I checked that both
   give the same f64.
+- **MANDELBROT/1**: Go passes the escape function as a func value; here
+  `draw_blocks` takes `impl Fn`, so every rung gets its own monomorphised
+  copy of the loop and calls the iteration directly rather than through a
+  pointer.
 - **FINALE**: the font is parsed at compile time by a `const fn`, where Go
   does it in `init`. Clippy's suggestion for `g *= g * pulse` is
   `g = g * g * pulse`, which rounds differently, so the code writes

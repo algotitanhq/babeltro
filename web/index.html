@@ -7,10 +7,11 @@
     <meta name="description" content="Nine classic demoscene effects, written in several languages, rendering the same pixels in your browser." />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
-  <body>
+  <body class="is-home">
     <header class="top">
-      <h1 class="mark">BABELTRO</h1>
-      <p class="tagline">Nine demoscene effects · four languages · the same pixels</p>
+      <a class="mark" href="#/">BABELTRO</a>
+      <p class="tagline">Nine demoscene effects · five languages · the same pixels</p>
+      <a class="back" href="#/">All effects</a>
       <label class="res">
         <span>Resolution</span>
         <select id="res">
@@ -21,17 +22,39 @@
       </label>
     </header>
 
+    <!-- home: the nine effects as cards around the question -->
+    <main class="home" id="home">
+      <div class="question">
+        <h1><span id="q">How do you make this effect</span> <span class="in">in <b id="qlang">Go</b>?</span></h1>
+        <p id="intro"></p>
+      </div>
+      <div class="cards" id="cards"></div>
+    </main>
+
+    <!-- the lab -->
     <nav class="rail" id="effects" aria-label="Effects"></nav>
 
-    <main class="stage">
+    <section class="stage" aria-label="Effect">
       <div class="panes" id="panes">
         <figure class="pane" data-pane="0">
           <canvas></canvas>
-          <figcaption><span class="who"></span><span class="ms"></span></figcaption>
+          <figcaption>
+            <span class="who"></span>
+            <span class="cost" title="How long this language takes to compute one frame, measured inside its worker. A 60 Hz screen allows 16.7 ms per frame; the bar shows how much of that is used.">
+              <span class="ms"></span>
+              <span class="bar"><i></i></span>
+            </span>
+          </figcaption>
         </figure>
         <figure class="pane" data-pane="1" hidden>
           <canvas></canvas>
-          <figcaption><span class="who"></span><span class="ms"></span></figcaption>
+          <figcaption>
+            <span class="who"></span>
+            <span class="cost" title="How long this language takes to compute one frame, measured inside its worker. A 60 Hz screen allows 16.7 ms per frame; the bar shows how much of that is used.">
+              <span class="ms"></span>
+              <span class="bar"><i></i></span>
+            </span>
+          </figcaption>
         </figure>
       </div>
       <div class="transport">
@@ -41,21 +64,32 @@
         <span class="frame" id="frame">frame 0</span>
         <span class="fps" id="fps"></span>
       </div>
-    </main>
+    </section>
 
     <aside class="side">
       <section>
         <h2>Language</h2>
         <div class="picker" id="pickA" role="radiogroup" aria-label="Language"></div>
       </section>
-      <section>
-        <h2>Compare with</h2>
-        <div class="picker" id="pickB" role="radiogroup" aria-label="Compare with"></div>
+
+      <section class="ladder" id="ladder" hidden>
+        <h2>Optimisation steps</h2>
+        <ol id="steps"></ol>
+        <label class="toggle"><input type="checkbox" id="vsBest" /> Compare with the last step</label>
       </section>
+
+      <section>
+        <h2>Compare with another language</h2>
+        <div class="picker" id="pickB" role="radiogroup" aria-label="Compare with"></div>
+        <p class="hint" id="compareHint">Runs a second language on the very same frames and checks every pixel against the first.</p>
+      </section>
+
       <section class="verdict" id="verdict" hidden>
         <p id="verdictText"></p>
-        <label class="toggle"><input type="checkbox" id="diff" /> Show the differences (D)</label>
+        <label class="toggle"><input type="checkbox" id="diff" /> Highlight the differences (D)</label>
+        <p class="legend" id="legend" hidden><i class="same"></i> same pixel <i class="differ"></i> different pixel</p>
       </section>
+
       <section class="about">
         <h2 id="effName"></h2>
         <p class="trick" id="effTrick"></p>

@@ -1,11 +1,13 @@
 // The code panel shows each port's own hot loop, read from its sources at
 // build time: every port marks one excerpt per scene between a line holding
-// `@excerpt <SCENE>` and a line holding `@end`.
+// `@excerpt <SCENE>` and a line holding `@end`. A scene with an optimisation
+// ladder also marks each earlier rung as `@excerpt <SCENE>/<k>`.
 
 const sources = {
   go: import.meta.glob('../../go/internal/fx/*.go', { query: '?raw', import: 'default', eager: true }),
   c: import.meta.glob('../../c/**/*.c', { query: '?raw', import: 'default', eager: true }),
   rust: import.meta.glob('../../rust/src/**/*.rs', { query: '?raw', import: 'default', eager: true }),
+  zig: import.meta.glob('../../zig/src/**/*.zig', { query: '?raw', import: 'default', eager: true }),
   js: import.meta.glob('../../js/**/*.js', { query: '?raw', import: 'default', eager: true }),
 };
 
@@ -17,7 +19,7 @@ function extract(files) {
     let body = [];
     let at = 0;
     lines.forEach((line, i) => {
-      const m = line.match(/@excerpt\s+([A-Z]+)/);
+      const m = line.match(/@excerpt\s+([A-Z]+(?:\/\d+)?)/);
       if (m) {
         scene = m[1];
         body = [];
@@ -47,7 +49,7 @@ export const EXCERPTS = Object.fromEntries(
 // Each port's NOTES.md has one bullet per scene, `- **SCENE**: text`, on how
 // that language approaches it differently from Go. The lab shows the bullet
 // above the excerpt.
-const notes = import.meta.glob('../../{c,rust,js}/NOTES.md', { query: '?raw', import: 'default', eager: true });
+const notes = import.meta.glob('../../{c,rust,zig,js}/NOTES.md', { query: '?raw', import: 'default', eager: true });
 
 export const NOTES = {};
 for (const [path, text] of Object.entries(notes)) {
@@ -55,7 +57,7 @@ for (const [path, text] of Object.entries(notes)) {
   const out = (NOTES[lang] = {});
   let scene = null;
   for (const line of text.split('\n')) {
-    const m = line.match(/^- \*\*([A-Z]+)\*\*:\s*(.*)$/);
+    const m = line.match(/^- \*\*([A-Z]+(?:\/\d+)?)\*\*:\s*(.*)$/);
     if (m) {
       scene = m[1];
       out[scene] = m[2];

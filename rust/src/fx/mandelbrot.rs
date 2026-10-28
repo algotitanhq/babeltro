@@ -14,6 +14,10 @@ pub struct Mandelbrot {
     max_iter: u32,
     /// block size in pixels
     step: usize,
+    /// the ladder: 1 iterates every pixel with no shortcut, 2 adds the closed
+    /// form test for the cardioid and the bulb, 3 (the default) also renders
+    /// on blocks of step×step pixels
+    rung: i32,
 }
 
 impl Mandelbrot {
@@ -25,6 +29,7 @@ impl Mandelbrot {
             scale: 1.0,
             max_iter: 192,
             step: 2,
+            rung: 0,
         }
     }
 }
@@ -51,8 +56,25 @@ impl Effect for Mandelbrot {
         self.cy = 0.0 + 0.131825904205330 * k;
     }
 
+    fn set_step(&mut self, n: i32) {
+        self.rung = n;
+    }
+
     fn draw(&mut self, fb: &mut Frame) {
-        let (w, step) = (fb.w, self.step);
+        // each rung is its own monomorphised copy of the loop, so the escape
+        // iteration is a direct call that can be inlined, never a pointer
+        match self.rung {
+            1 => self.draw_blocks(fb, 1, mandel_iter_plain),
+            2 => self.draw_blocks(fb, 1, mandel_iter),
+            _ => self.draw_blocks(fb, self.step, mandel_iter),
+        }
+    }
+}
+
+impl Mandelbrot {
+    /// Renders on blocks of `step`×`step` pixels, one escape iteration each.
+    fn draw_blocks(&self, fb: &mut Frame, step: usize, iter: impl Fn(f64, f64, u32) -> u32) {
+        let w = fb.w;
         let asp = fb.h as f64 / w as f64;
         let span = self.scale;
         let x0 = self.cx - span * 0.5;
@@ -69,7 +91,7 @@ impl Effect for Mandelbrot {
             let (first, rest) = band.split_at_mut(w);
             for (bx, block) in first.chunks_mut(step).enumerate() {
                 let cx = x0 + (bx * step) as f64 * d;
-                let it = mandel_iter(cx, cy, max_iter);
+                let it = iter(cx, cy, max_iter);
                 block.fill(if it >= max_iter {
                     0xFF0A_0812
                 } else {
@@ -87,6 +109,7 @@ impl Effect for Mandelbrot {
     }
 }
 
+// @excerpt MANDELBROT/2
 /// The escape iteration of c = cx + i·cy, or `max` if it never escapes.
 fn mandel_iter(cx: f64, cy: f64, max: u32) -> u32 {
     // cheap escape test for the main cardioid and the period-2 bulb
@@ -109,3 +132,23 @@ fn mandel_iter(cx: f64, cy: f64, max: u32) -> u32 {
     }
     max
 }
+// @end
+
+// @excerpt MANDELBROT/1
+/// The escape-time loop and nothing else: every point inside the set runs
+/// the full budget before it gives up.
+fn mandel_iter_plain(cx: f64, cy: f64, max: u32) -> u32 {
+    let (mut zx, mut zy) = (0.0, 0.0);
+    let (mut zx2, mut zy2) = (0.0, 0.0);
+    for i in 0..max {
+        zy = 2.0 * zx * zy + cy;
+        zx = zx2 - zy2 + cx;
+        zx2 = zx * zx;
+        zy2 = zy * zy;
+        if zx2 + zy2 > 4.0 {
+            return i;
+        }
+    }
+    max
+}
+// @end

@@ -18,6 +18,13 @@ pub struct Plasma {
     sxy: Vec<f32>,
     phase: f32,
     pal: &'static Palette,
+    /// the ladder: 1 calls sin() four times per pixel, 2 reads the sine
+    /// table four times per pixel, 3 (the default) moves three of the four
+    /// lookups into per-frame 1D tables
+    step: i32,
+    t: f32,
+    kx: f32,
+    ky: f32,
 }
 
 impl Plasma {
@@ -31,6 +38,10 @@ impl Plasma {
             sxy: Vec::new(),
             phase: 0.0,
             pal: &SUNSET,
+            step: 0,
+            t: 0.0,
+            kx: 0.0,
+            ky: 0.0,
         }
     }
 }
@@ -69,9 +80,19 @@ impl Effect for Plasma {
             *v = sine.sin(i as f32 * kx * 0.85 + t * 0.8);
         }
         self.phase = t * 2.6;
+        (self.t, self.kx, self.ky) = (t, kx, ky);
+    }
+
+    fn set_step(&mut self, n: i32) {
+        self.step = n;
     }
 
     fn draw(&mut self, fb: &mut Frame) {
+        match self.step {
+            1 => return self.draw_sin(fb),
+            2 => return self.draw_table(fb),
+            _ => {}
+        }
         let sine = fmath::table();
         let (w, pal, phase) = (fb.w, self.pal, self.phase);
 
@@ -88,6 +109,64 @@ impl Effect for Plasma {
             for (((px, &rad), &sx), &sxy) in cols {
                 let v = sx + sy + sxy + sine.sin(rad + phase);
                 *px = pal[((v * 36.0 + 127.5) as i32).clamp(0, 255) as usize];
+            }
+        }
+        // @end
+    }
+}
+
+impl Plasma {
+    /// The plasma as you would first write it: every term, every pixel,
+    /// straight from the maths library. Slow, and the reference for what the
+    /// table approximates. The sines are computed in f64 and rounded to f32,
+    /// like the table entries.
+    fn draw_sin(&self, fb: &mut Frame) {
+        let (w, h) = (fb.w, fb.h);
+        let (t, kx, ky) = (self.t, self.kx, self.ky);
+        let (cx, cy) = (w as f32 * 0.5, h as f32 * 0.5);
+        let kr = 44.0 / (w + h) as f32;
+        let sin = |a: f32| f64::from(a).sin() as f32;
+
+        // @excerpt PLASMA/1
+        for y in 0..h {
+            let dy = y as f32 - cy;
+            for x in 0..w {
+                let dx = x as f32 - cx;
+                let rad = (dx * dx + dy * dy).sqrt() * kr;
+                let v = sin(x as f32 * kx + t * 1.3)
+                    + sin(y as f32 * ky * 1.35 - t * 1.1)
+                    + sin((x + y) as f32 * kx * 0.85 + t * 0.8)
+                    + sin(rad + self.phase);
+                let i = ((v * 36.0 + 127.5) as i32).clamp(0, 255);
+                fb.pix[y * w + x] = self.pal[i as usize];
+            }
+        }
+        // @end
+    }
+
+    /// The same per-pixel structure as `draw_sin`, reading the sine table
+    /// instead of calling sin(). Same arguments, so the same pixels as the
+    /// optimised version; the only change from `draw_sin` is the table's
+    /// precision.
+    fn draw_table(&self, fb: &mut Frame) {
+        let sine = fmath::table();
+        let (w, h) = (fb.w, fb.h);
+        let (t, kx, ky) = (self.t, self.kx, self.ky);
+        let (cx, cy) = (w as f32 * 0.5, h as f32 * 0.5);
+        let kr = 44.0 / (w + h) as f32;
+
+        // @excerpt PLASMA/2
+        for y in 0..h {
+            let dy = y as f32 - cy;
+            for x in 0..w {
+                let dx = x as f32 - cx;
+                let rad = (dx * dx + dy * dy).sqrt() * kr;
+                let v = sine.sin(x as f32 * kx + t * 1.3)
+                    + sine.sin(y as f32 * ky * 1.35 - t * 1.1)
+                    + sine.sin((x + y) as f32 * kx * 0.85 + t * 0.8)
+                    + sine.sin(rad + self.phase);
+                let i = ((v * 36.0 + 127.5) as i32).clamp(0, 255);
+                fb.pix[y * w + x] = self.pal[i as usize];
             }
         }
         // @end

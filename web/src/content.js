@@ -13,12 +13,21 @@ export const EFFECTS = [
     seconds: 11, // the scene loops after this, as in the demo
     trick: 'Polar lookup tables',
     text: 'Every pixel knows its distance and angle from the centre, computed once per screen size. Scrolling the distance flies you forward.',
+    steps: [
+      { name: 'atan2 + sqrt per pixel', text: 'Distance and angle from the centre, computed for every pixel, every frame — for values that never change.' },
+      { name: 'Polar tables', text: 'The same two numbers, computed once per screen size and read back. Not a single pixel changes.' },
+    ],
   },
   {
     name: 'PLASMA',
     seconds: 10, // the scene loops after this, as in the demo
     trick: 'Summed sines · palette',
     text: 'Four sine waves summed per pixel and read through a palette. Three depend only on x, y or x+y, so they are 1D tables rebuilt each frame.',
+    steps: [
+      { name: 'sin() per pixel', text: 'The first version anyone writes: four calls to the maths library for every pixel.' },
+      { name: 'Sine table', text: 'The same loop, reading an 8192-entry table instead of calling sin(). A few pixels shift by the table’s precision.' },
+      { name: '1D tables', text: 'Three of the four terms depend only on x, y or x+y, so they are computed once per frame, not once per pixel.' },
+    ],
   },
   {
     name: 'ROTOZOOM',
@@ -49,6 +58,11 @@ export const EFFECTS = [
     seconds: 12, // the scene loops after this, as in the demo
     trick: 'Escape time · early out',
     text: 'Iterate z = z² + c until it escapes. A closed-form test skips the main cardioid, where points never escape, and the budget grows with the zoom.',
+    steps: [
+      { name: 'Plain escape time', text: 'Iterate every pixel until it escapes. Points inside the set run the whole budget for nothing.' },
+      { name: 'Cardioid test', text: 'A closed-form test spots the main cardioid and bulb, where points never escape, and skips them. Same pixels.' },
+      { name: '2×2 blocks', text: 'Compute one point per block of four pixels. The honest trade-off: in motion nobody sees it.' },
+    ],
   },
   {
     name: 'FINALE',
@@ -59,6 +73,7 @@ export const EFFECTS = [
 ];
 
 // The order here is the order of the pickers and of the number keys.
+// `how` is one line on how the language gets into the browser.
 export const LANGS = [
   {
     id: 'go',
@@ -77,9 +92,16 @@ export const LANGS = [
   {
     id: 'rust',
     name: 'Rust',
-    color: '#ff8a4c',
+    color: '#ef6a45',
     hl: 'rust',
     how: 'Rust → wasm32-unknown-unknown. No runtime; bounds checks stay unless iterators prove them away.',
+  },
+  {
+    id: 'zig',
+    name: 'Zig',
+    color: '#f7a41d',
+    hl: 'zig',
+    how: 'Zig → wasm, freestanding. Tables built at compile time, its own maths library.',
   },
   {
     id: 'js',
@@ -89,3 +111,8 @@ export const LANGS = [
     how: 'Plain JavaScript, no wasm. Every float32 operation needs Math.fround to match.',
   },
 ];
+
+export const HOME = {
+  question: 'How do you make this effect',
+  intro: 'Nine classic demoscene effects, each written in several languages, all running live in your browser and drawing the same pixels. Pick one to see how each language does it.',
+};

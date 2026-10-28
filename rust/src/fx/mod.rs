@@ -34,6 +34,10 @@ pub trait Effect {
     fn prepare(&mut self, s: &State);
     /// Renders the whole frame.
     fn draw(&mut self, fb: &mut Frame);
+    /// Picks a rung of the scene's optimisation ladder: the same image built
+    /// naively first, then one optimisation at a time. 0, the default, is the
+    /// fully optimised version; scenes without a ladder ignore it.
+    fn set_step(&mut self, _n: i32) {}
 }
 
 /// The effect for scene number `scene`, in playback order.

@@ -2,7 +2,8 @@
 //! browser lab. It exports the three functions every port exports (see
 //! spec/ABI.md): `bb_init` allocates the framebuffer, `bb_start` begins a
 //! scene from a clean state, `bb_render` draws one frame of it. One thread,
-//! the effect's pixels and nothing else.
+//! the effect's pixels and nothing else. The optional `bb_step` picks a rung
+//! of a scene's optimisation ladder.
 //!
 //! ```sh
 //! cargo build --release --target wasm32-unknown-unknown
@@ -63,6 +64,18 @@ pub extern "C" fn bb_start(scene: i32) {
         let mut effect = fx::new_effect(scene);
         effect.resize(lab.fb.w, lab.fb.h);
         lab.effect = Some(effect);
+    });
+}
+
+/// Picks rung `n` of the current scene's optimisation ladder, for the scenes
+/// that have one; 0 is the optimised default. Called after `bb_start`,
+/// before the first frame.
+#[unsafe(no_mangle)]
+pub extern "C" fn bb_step(n: i32) {
+    LAB.with_borrow_mut(|lab| {
+        if let Some(effect) = lab.as_mut().and_then(|lab| lab.effect.as_mut()) {
+            effect.set_step(n);
+        }
     });
 }
 

@@ -45,6 +45,7 @@ async function handle(msg) {
       break;
     case 'start':
       port.start(msg.scene);
+      port.step(msg.step || 0);
       self.postMessage({ type: 'ready' });
       break;
     case 'render': {
