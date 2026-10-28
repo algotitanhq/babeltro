@@ -40,6 +40,8 @@ export async function fromWasm(bytes, log) {
       return pixels();
     },
     start: (scene) => ex.bb_start(scene),
+    // optional: a port without ladders simply has no bb_step
+    step: (n) => ex.bb_step?.(n),
     render: (n) => ex.bb_render(n),
     pixels,
   };
@@ -55,6 +57,7 @@ export function fromModule(mod) {
       return fb;
     },
     start: (scene) => mod.start(scene),
+    step: (n) => mod.step?.(n),
     render: (n) => mod.render(n),
     pixels: () => fb,
   };

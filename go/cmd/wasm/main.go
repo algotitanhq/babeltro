@@ -43,6 +43,17 @@ func bbStart(scene int32) {
 	eff.Resize(fb.W, fb.H)
 }
 
+// bb_step picks a rung of the scene's optimisation ladder, for the scenes
+// that have one (fx.Stepped); 0 is the optimised default. Called after
+// bb_start, before the first frame.
+//
+//go:wasmexport bb_step
+func bbStep(n int32) {
+	if s, ok := eff.(fx.Stepped); ok {
+		s.SetStep(int(n))
+	}
+}
+
 // bb_render draws frame n (n ≥ 1) of the current scene. Time is derived
 // from n at a fixed 60 Hz step, never from a clock, so a frame number names
 // the same image everywhere.

@@ -17,7 +17,14 @@ type Mandelbrot struct {
 	scale   float64
 	maxIter int
 	step    int
+
+	// the ladder: 1 iterates every pixel with no shortcut, 2 adds the closed
+	// form test for the cardioid and the bulb, 3 (the default) also renders
+	// on blocks of step×step pixels
+	rung int
 }
+
+func (m *Mandelbrot) SetStep(n int) { m.rung = n }
 
 func NewMandelbrot() *Mandelbrot {
 	return &Mandelbrot{pal: palette.Ice, maxIter: 192, step: 2}
@@ -61,6 +68,13 @@ func (m *Mandelbrot) Prepare(s State, w, h int) {
 func (m *Mandelbrot) Draw(fb *canvas.FB, y0, y1 int) {
 	w, h := fb.W, fb.H
 	step := m.step
+	iter := mandelIter
+	switch m.rung {
+	case 1:
+		step, iter = 1, mandelIterPlain
+	case 2:
+		step = 1
+	}
 	asp := float64(h) / float64(w)
 	span := m.scale
 	x0 := m.cx - span*0.5
@@ -75,6 +89,7 @@ func (m *Mandelbrot) Draw(fb *canvas.FB, y0, y1 int) {
 	// iterate over blocks, not rows: each block is computed exactly once, by
 	// the band that owns its first row
 	sy := (y0 + step - 1) / step
+	// @excerpt MANDELBROT
 	for ; sy*step < y1; sy++ {
 		cy := y0w + float64(sy*step)*d
 		yStart := sy * step
@@ -85,7 +100,7 @@ func (m *Mandelbrot) Draw(fb *canvas.FB, y0, y1 int) {
 		for x := 0; x < w; x += step {
 			sx := x / step
 			cx := x0 + float64(sx*step)*d
-			it := mandelIter(cx, cy, maxIter)
+			it := iter(cx, cy, maxIter)
 			var c uint32
 			if it >= maxIter {
 				c = 0xFF0A0812
@@ -111,9 +126,10 @@ func (m *Mandelbrot) Draw(fb *canvas.FB, y0, y1 int) {
 			}
 		}
 	}
+	// @end
 }
 
-// @excerpt MANDELBROT
+// @excerpt MANDELBROT/2
 func mandelIter(cx, cy float64, max int) int {
 	// cheap escape test for the main cardioid and the period-2 bulb
 	x := cx - 0.25
@@ -125,6 +141,27 @@ func mandelIter(cx, cy float64, max int) int {
 	if (cx+1)*(cx+1)+y2 <= 0.0625 {
 		return max
 	}
+	zx, zy := 0.0, 0.0
+	zx2, zy2 := 0.0, 0.0
+	for i := 0; i < max; i++ {
+		zy = 2*zx*zy + cy
+		zx = zx2 - zy2 + cx
+		zx2 = zx * zx
+		zy2 = zy * zy
+		if zx2+zy2 > 4 {
+			return i
+		}
+	}
+	return max
+}
+
+// @end
+
+// mandelIterPlain is the escape-time loop and nothing else: every point
+// inside the set runs the full budget before it gives up.
+//
+// @excerpt MANDELBROT/1
+func mandelIterPlain(cx, cy float64, max int) int {
 	zx, zy := 0.0, 0.0
 	zx2, zy2 := 0.0, 0.0
 	for i := 0; i < max; i++ {

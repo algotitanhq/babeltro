@@ -33,6 +33,14 @@ type Effect interface {
 	Parallel() bool
 }
 
+// Stepped is implemented by the effects the lab shows as a ladder: the same
+// image built naively first, then one optimisation at a time. Step 0, the
+// default, is the fully optimised version the demo runs; steps 1..n are the
+// rungs, n being that same optimised version.
+type Stepped interface {
+	SetStep(n int)
+}
+
 // All returns the effects in playback order.
 func All() []Effect {
 	return []Effect{

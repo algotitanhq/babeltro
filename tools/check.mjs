@@ -5,6 +5,9 @@
 //   node tools/check.mjs c rust js                 every scene, default frames
 //   node tools/check.mjs --scene 2 --at 1,30 c      one scene, chosen frames
 //   node tools/check.mjs --png /tmp/out c           also write ref/port/diff PNGs
+//   node tools/check.mjs --scene 2 --step 1 c       one rung of a scene's ladder
+//   node tools/check.mjs --scene 2 --step 1 --ref-step 3 go
+//                                                   a rung against the optimised one
 //
 // Ports are read from web/public/wasm/<lang>.wasm, except js (js/babeltro.js).
 
@@ -17,7 +20,7 @@ import { SCENES, fromWasm, fromModule } from '../web/src/host/ports.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const args = process.argv.slice(2);
-const opt = { size: '640x360', at: '1,2,60,300', scene: null, png: null };
+const opt = { size: '640x360', at: '1,2,60,300', scene: null, step: '0', png: null };
 const langs = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
@@ -31,6 +34,8 @@ if (langs.length === 0) {
 const [W, H] = opt.size.split('x').map(Number);
 const checkpoints = opt.at.split(',').map(Number).sort((a, b) => a - b);
 const last = checkpoints[checkpoints.length - 1];
+const step = Number(opt.step);
+const refStep = opt['ref-step'] === undefined ? step : Number(opt['ref-step']);
 const scenes = opt.scene === null ? SCENES.map((_, i) => i) : [Number(opt.scene)];
 
 async function load(lang) {
@@ -108,13 +113,15 @@ for (const lang of langs) {
 }
 if (opt.png) mkdirSync(opt.png, { recursive: true });
 
-console.log(`${W}x${H}, frames ${checkpoints.join(',')}, reference go\n`);
+console.log(`${W}x${H}, frames ${checkpoints.join(',')}, step ${step}, reference go step ${refStep}\n`);
 console.log('lang  scene        frame   diff px   max  box                 go ms   port ms');
 let failed = 0;
 for (const { lang, p } of ports) {
   for (const s of scenes) {
     ref.start(s);
     p.start(s);
+    ref.step(refStep);
+    p.step(step);
     const tRef = [], tPort = [];
     for (let n = 1; n <= last; n++) {
       let t = performance.now();
