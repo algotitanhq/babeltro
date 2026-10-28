@@ -10,5 +10,5 @@ npm ci --silent
 for d in "$root"/ports/*/; do
   [ -f "$d/package.json" ] && [ -f "$d/port.js" ] && (cd "$d" && npm ci --silent)
 done
-npx vite build
+npm run build
 npx wrangler deploy

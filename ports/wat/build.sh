@@ -15,7 +15,8 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 {
   echo '(module'
-  for f in memory fmath palette plasma fire tunnel rotozoom metaballs mandelbrot main; do
+  for f in memory fmath palette font text starfield tunnel plasma rotozoom metaballs \
+           grid fire mandelbrot finale main; do
     cat "$here/$f.wat"
   done
   echo ')'

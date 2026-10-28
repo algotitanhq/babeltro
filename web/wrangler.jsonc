@@ -1,11 +1,17 @@
 // The lab is static: web/dist plus the wasm modules, served as Worker assets
 // (free and unlimited, so a traffic spike is safe). No Worker script.
-// Private for now: Cloudflare Access sits in front of babeltro.*.workers.dev.
+// Every effect gets its own page (tools/og.mjs) so a shared link shows its preview.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "babeltro",
   "compatibility_date": "2026-09-01",
-  "assets": { "directory": "./dist" },
+  "assets": {
+    "directory": "./dist",
+    // /plasma serves plasma/index.html directly, no redirect to /plasma/
+    "html_handling": "drop-trailing-slash",
+    // an effect address with no page of its own falls back to the app
+    "not_found_handling": "single-page-application"
+  },
   "workers_dev": true,
   "preview_urls": false
 }

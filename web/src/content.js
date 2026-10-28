@@ -139,8 +139,7 @@ export const LANGS = [
     name: 'Hand-written wasm',
     color: '#b48cff',
     hl: 'wasm',
-    how: 'Hand-written WAT, no compiler: its own sin, atan2 and exp, a 7.6 KB module.',
-    scenes: [1, 2, 3, 4, 6, 7],
+    how: 'Hand-written WAT, no compiler: its own sin, atan2 and exp, a 14.5 KB module.',
   },
   {
     id: 'x86',

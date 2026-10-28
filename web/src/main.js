@@ -445,7 +445,7 @@ function renderChrome() {
   const eff = EFFECTS[state.scene];
 
   $('effects').innerHTML = EFFECTS.map(
-    (e, i) => `<a href="#/${slug(e.name)}" aria-current="${i === state.scene}">
+    (e, i) => `<a href="/${slug(e.name)}" aria-current="${i === state.scene}">
       <span class="num">${String(i + 1).padStart(2, '0')}</span>
       <span class="name">${e.name}</span>
       <span class="sub">${e.trick}</span>
@@ -604,7 +604,7 @@ function buildHome() {
   $('intro').textContent = HOME.intro;
   $('cards').innerHTML = EFFECTS.map((e, i) => {
     const [x, y, r] = SCATTER[i];
-    return `<a class="card" href="#/${slug(e.name)}" style="--x:${x}%;--y:${y}%;--r:${r}deg">
+    return `<a class="card" href="/${slug(e.name)}" style="--x:${x}%;--y:${y}%;--r:${r}deg">
       <canvas width="256" height="144"></canvas>
       <span class="label"><b>${String(i + 1).padStart(2, '0')}</b> ${e.name}</span>
       <span class="trick">${e.trick}</span>
@@ -644,10 +644,12 @@ function buildHome() {
   );
 }
 
-// --- routing: #/ is home, #/plasma is the lab on that effect --------------
+// --- routing: / is home, /plasma is the lab on that effect ----------------
 
 async function route() {
-  const name = location.hash.replace(/^#\/?/, '').toUpperCase();
+  // old links were #/plasma: keep them working, under the real address
+  if (location.hash.startsWith('#/')) history.replaceState(null, '', '/' + location.hash.slice(2));
+  const name = location.pathname.replace(/^\/|\/$/g, '').toUpperCase();
   const i = EFFECTS.findIndex((e) => e.name === name);
   state.view = i < 0 ? 'home' : 'lab';
   document.body.className = `is-${state.view}`;
@@ -682,7 +684,19 @@ $('diff').onchange = (e) => toggleDiff(e.target.checked);
 $('race').onclick = race;
 $('vsBest').onchange = (e) => setVsBest(e.target.checked);
 $('res').onchange = (e) => setResolution(e.target.value);
-window.addEventListener('hashchange', route);
+// Each effect has a real address (/plasma), so a shared link gets that
+// effect's preview; moving between them stays in the page.
+const navigate = (path) => {
+  if (path !== location.pathname) history.pushState(null, '', path);
+  route();
+};
+window.addEventListener('popstate', route);
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href^="/"]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+  e.preventDefault();
+  navigate(a.getAttribute('href'));
+});
 
 document.addEventListener('keydown', (e) => {
   if (!$('source').hidden) {
@@ -692,7 +706,7 @@ document.addEventListener('keydown', (e) => {
   if (state.view !== 'lab') return;
   if (e.target.closest('select, input') || e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key;
-  const go = (i) => (location.hash = `#/${slug(EFFECTS[(i + EFFECTS.length) % EFFECTS.length].name)}`);
+  const go = (i) => navigate(`/${slug(EFFECTS[(i + EFFECTS.length) % EFFECTS.length].name)}`);
   if (k === ' ') {
     e.preventDefault();
     togglePlay();
@@ -702,7 +716,7 @@ document.addEventListener('keydown', (e) => {
   } else if (k === 'ArrowUp' || k === 'ArrowLeft') {
     e.preventDefault();
     go(state.scene - 1);
-  } else if (k === 'Escape') location.hash = '#/';
+  } else if (k === 'Escape') navigate('/');
   else if (k === '.') step();
   else if (k === 'r') selectScene(state.scene);
   else if (k === 'd' && spec(1)) toggleDiff();

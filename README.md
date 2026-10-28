@@ -40,7 +40,7 @@ some, the absence of a maths library.
 | Rust | `ports/rust/` | wasm32-unknown-unknown, no dependencies | 9 |
 | Zig | `ports/zig/` | wasm32-freestanding, comptime tables | 9 |
 | AssemblyScript | `ports/assemblyscript/` | asc, no imports | 9 |
-| WebAssembly, by hand | `ports/wat/` | hand-written WAT, its own sin/atan2/exp, 7.6 KB | 6 |
+| WebAssembly, by hand | `ports/wat/` | hand-written WAT, its own sin/atan2/exp, 14.5 KB | 9 |
 | x86 assembly | `ports/x86/` | NASM machine code on a tiny 386+SSE emulator in wasm | 8 |
 | JavaScript | `ports/js/` | plain ES modules, `Math.fround` everywhere | 9 |
 | Python | `ports/python/` | CPython + NumPy in wasm (Pyodide) | 9 |

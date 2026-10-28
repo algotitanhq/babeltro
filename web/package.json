@@ -5,7 +5,7 @@
   "scripts": {
     "wasm": "../scripts/build-all.sh",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node ../tools/og.mjs",
     "preview": "vite preview"
   },
   "devDependencies": {
