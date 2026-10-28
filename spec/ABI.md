@@ -3,9 +3,7 @@
 Every language port is a module the browser lab drives through the same
 three calls. The C port (`ports/c`) is the reference: a port is correct
 when, for every scene and every frame, its framebuffer is byte-identical to
-C's — except where the image spells the language's name. The effects were
-first written in Go (`go/`), and every port was first checked against Go;
-the two are byte-identical, so either can serve (`tools/check.mjs --ref go`).
+C's — except where the image spells the language's name.
 
 ## Exports
 

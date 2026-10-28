@@ -464,6 +464,11 @@ function renderChrome() {
       style="--c:${l.color}" ${off ? 'disabled' : ''} title="${why}">${l.name}</button>`;
   };
   $('pickA').innerHTML = LANGS.map((l) => pill(0, l, state.lang === l.id)).join('');
+  // say why a language is greyed, in words, not only in a tooltip
+  const missing = LANGS.filter((l) => available.has(l.id) && !covers(l.id)).map((l) => l.name);
+  $('notHere').textContent = missing.length
+    ? `${missing.join(', ')} ${missing.length > 1 ? "don't" : "doesn't"} do this effect yet.`
+    : '';
   $('pickB').innerHTML = [
     pill(1, null, !state.read),
     ...LANGS.map((l) => pill(1, l, state.read === l.id)),
@@ -526,11 +531,7 @@ function renderCode() {
       const kb = pane?.bytes ? ` · ${(pane.bytes / 1024).toFixed(0)} KB module` : '';
       const note =
         NOTES[s.lang]?.[key] ??
-        (s.lang === 'c' && !s.step
-          ? 'The reference: every other language must match these pixels.'
-          : s.lang === 'go' && !s.step
-            ? 'Where the effects were first written, before C became the reference.'
-            : '');
+        (s.lang === 'c' && !s.step ? 'The reference: every other language must match these pixels.' : '');
       const label = eff.steps ? ` · step ${rung}: ${eff.steps[rung - 1].name}` : '';
       const body = !ex
         ? `<p class="missing">${l.name} has no excerpt for this ${eff.steps ? 'step' : 'effect'} yet.</p>`

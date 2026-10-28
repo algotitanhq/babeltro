@@ -33,7 +33,7 @@ some, the absence of a maths library.
 
 | Language | Directory | How it gets into the browser | Effects |
 | --- | --- | --- | --- |
-| Go | `go/` | wasm, Go's own backend — where the effects were first written | 9 |
+| Go | `go/` | wasm, Go's own backend | 9 |
 | TinyGo | `ports/tinygo/` | the same Go files, compiled through LLVM | 9 |
 | C | `ports/c/` | clang + wasi-libc — **the reference** | 9 |
 | C++ | `ports/cpp/` | clang + libc++, C++23 | 9 |
