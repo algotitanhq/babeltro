@@ -1,25 +1,54 @@
 # babeltro
 
-A demoscene intro computed pixel by pixel on the CPU, then rewritten in
-several languages. Babel for the languages, "-tro" for the intro: every
-language remakes the same production.
+Nine classic demoscene effects — starfield, tunnel, plasma, rotozoom,
+metaballs, synthwave grid, fire, Mandelbrot, a logo card — written in several
+languages and run side by side in the browser. Babel for the languages,
+"-tro" for the intro.
 
-The point is not to find out which language wins. It is to see what each
-language makes you write differently to produce **the same image**: memory
-model, parallelism, floating-point arithmetic, bounds checks, bindings to the
-system.
+The point is not which language wins. It is to see how each one approaches
+the same effect, and what it takes to make it produce **the same pixels**:
+float widths, fused multiply-adds, float-to-int conversion, bounds checks,
+evaluation order, the maths library.
 
-## Rules
+## The lab
 
-Every port must render, at the same instant, the same image as the Go
-reference, byte for byte. The only intended difference is the language's own
-words — its name in the logo, the scroller and the HUD, and what it calls its
-workers (`go/internal/brand`). Any other difference is measured and
-explained, never ignored.
+```sh
+cd web
+npm install
+npm run wasm      # builds go.wasm, c.wasm, rust.wasm into web/public/wasm
+npm run dev
+```
+
+One screen: pick an effect, a language, and a second language to compare
+with. The lab counts the differing pixels every frame and can paint them in
+magenta; under the canvases, each language's hot loop and a note on how that
+language does it differently. Every pane runs in its own worker.
+
+Keys: `Space` pause, `←`/`→` effect, `.` one frame, `R` restart, `D`
+differences, `1`–`4` compare with a language, `Shift`+`1`–`4` main language.
 
 ## Ports
 
-| Directory | Language | Status |
-| --- | --- | --- |
-| `go/` | Go | reference: nine scenes, window, HUD, `-bench`, `-dump` |
-| `goose/` | Goose | test bench: the PLASMA scene only (see `goose/RESULTS.md`) |
+| Directory | Language | How it runs in the browser | Pixels vs Go |
+| --- | --- | --- | --- |
+| `go/` | Go | wasm (`GOOS=wasip1`, reactor) — the reference | — |
+| `c/` | C17 | wasm via clang + wasi-libc | identical ¹ |
+| `rust/` | Rust | wasm32-unknown-unknown, no dependencies | identical ¹ |
+| `js/` | JavaScript | plain ES modules, no wasm | identical ¹ |
+| `goose/` | Goose | test bench, PLASMA only, native (see `goose/RESULTS.md`) | — |
+
+¹ Every scene at every size tested, except the finale, which spells the
+language's name: the logo's size follows the name's width, and the card is
+laid out around it.
+
+Each port has a `NOTES.md` with what it does differently, scene by scene. The
+contract every port follows is `spec/ABI.md`. `go/` also still builds the
+original native demo (window, HUD, worker pool): see `go/README.md`.
+
+## Checking a port
+
+```sh
+node tools/check.mjs c rust js                  # every scene against Go
+node tools/check.mjs --scene 2 --at 1,600 c     # one scene, chosen frames
+node tools/check.mjs --png /tmp/diff rust       # also write ref/port/diff PNGs
+```

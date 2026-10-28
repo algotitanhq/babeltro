@@ -24,8 +24,9 @@ arithmetic, is the one scene clearly slower than Go's wasm.
 - **TUNNEL**: the hot loop indexes `SIN_TAB` directly instead of calling
   `sin01()`. V8 inlines the call, but the loop still ran about 2.5x slower with
   it (measured, Node 23).
-- **PLASMA**: the same inline table read. Go also fills a fourth table
-  (`sxy2`) that `Draw` never reads. The port leaves it out.
+- **PLASMA**: the pixel loop reads `SIN_TAB` inline rather than through
+  `sin()`: the helper call, though inlined by V8, made the loop about 2.8x
+  slower (2.5 ms against 0.9 ms).
 - **ROTOZOOM**: the row terms `dy*sinA` and `dy*cosA` are hoisted. The values
   are the same, so the pixels are too. The texture's `math.Mod` is JS `%`,
   which also takes the sign of the dividend.

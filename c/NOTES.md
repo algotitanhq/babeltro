@@ -16,8 +16,6 @@ ever one of each. Build: `scripts/build-c.sh`.
   framebuffer, so the loop walks all three with one flat index. `restrict`
   tells the compiler the three never alias, which Go cannot express.
 - **PLASMA**: Go's `sxy[y : y+w]` slice becomes the pointer `P.sxy + y`.
-  The Go code also fills a fourth table (`sxy2`) that it never reads; the
-  port drops it.
 - **ROTOZOOM**: the 1 MiB texture lives in static storage and is built once
   per module, not once per scene start. `math.Mod` is `fmod`. Go rounds the
   texture coordinates to float32 before using them in double maths; the

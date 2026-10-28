@@ -15,6 +15,15 @@ let h = 0;
 const log = (line) => self.postMessage({ type: 'log', line });
 
 self.onmessage = async ({ data: msg }) => {
+  try {
+    await handle(msg);
+  } catch (err) {
+    // reply anyway: the page waits for an answer to every request
+    self.postMessage({ type: 'error', message: String(err?.stack || err) });
+  }
+};
+
+async function handle(msg) {
   switch (msg.type) {
     case 'load': {
       let bytes = 0;
@@ -52,4 +61,4 @@ self.onmessage = async ({ data: msg }) => {
       break;
     }
   }
-};
+}

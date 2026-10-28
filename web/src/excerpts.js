@@ -43,3 +43,26 @@ function dedent(lines) {
 export const EXCERPTS = Object.fromEntries(
   Object.entries(sources).map(([lang, files]) => [lang, extract(files)]),
 );
+
+// Each port's NOTES.md has one bullet per scene, `- **SCENE**: text`, on how
+// that language approaches it differently from Go. The lab shows the bullet
+// above the excerpt.
+const notes = import.meta.glob('../../{c,rust,js}/NOTES.md', { query: '?raw', import: 'default', eager: true });
+
+export const NOTES = {};
+for (const [path, text] of Object.entries(notes)) {
+  const lang = path.split('/').at(-2);
+  const out = (NOTES[lang] = {});
+  let scene = null;
+  for (const line of text.split('\n')) {
+    const m = line.match(/^- \*\*([A-Z]+)\*\*:\s*(.*)$/);
+    if (m) {
+      scene = m[1];
+      out[scene] = m[2];
+    } else if (scene && /^\s{2,}\S/.test(line)) {
+      out[scene] += ' ' + line.trim();
+    } else {
+      scene = null;
+    }
+  }
+}

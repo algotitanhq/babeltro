@@ -1,5 +1,5 @@
 import { EFFECTS, LANGS } from './content.js';
-import { EXCERPTS } from './excerpts.js';
+import { EXCERPTS, NOTES } from './excerpts.js';
 
 // --- state ---------------------------------------------------------------
 
@@ -35,8 +35,9 @@ class Pane {
   // call sends one message and resolves with the worker's next reply; the
   // page never has two requests in flight to the same worker.
   call(msg, transfer) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.resolve = resolve;
+      this.reject = reject;
       this.worker.postMessage(msg, transfer || []);
     });
   }
@@ -47,8 +48,10 @@ class Pane {
     this.times = [];
     this.pixels = null;
     this.worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    this.worker.onerror = (e) => this.reject?.(new Error(`${lang} worker: ${e.message}`));
     this.worker.onmessage = ({ data }) => {
       if (data.type === 'log') return console.log(`[${this.lang}] ${data.line}`);
+      if (data.type === 'error') return this.reject?.(new Error(`${this.lang}: ${data.message}`));
       this.resolve?.(data);
     };
     const { bytes } = await this.call({ type: 'load', lang, url: wasmUrl(lang) });
@@ -94,28 +97,37 @@ const active = () => panes.filter((p, i) => state.langs[i]);
 
 // --- the frame loop ----------------------------------------------------
 
-let busy = false;
+// Every operation that talks to the workers goes through one queue: a frame
+// in flight and a language being swapped in must never interleave, or the
+// replies would answer the wrong requests.
+let queue = Promise.resolve();
+let pending = 0;
+function exclusive(fn) {
+  pending++;
+  const run = queue.then(fn).finally(() => pending--);
+  queue = run.catch((err) => console.error(err));
+  return run;
+}
+
 let lastTick = 0;
 let fpsT = performance.now();
 let fpsN = 0;
 
 async function advance() {
-  busy = true;
   const max = EFFECTS[state.scene].seconds * 60;
   if (state.n >= max) await restartScene();
   const n = state.n + 1;
   await Promise.all(active().map((p) => p.render(n)));
   state.n = n;
   present();
-  busy = false;
 }
 
 function loop(now) {
   requestAnimationFrame(loop);
   // 60 Hz at most, whatever the display, because a frame number is a time
-  if (!state.playing || busy || now - lastTick < 16) return;
+  if (!state.playing || pending || now - lastTick < 16) return;
   lastTick = now;
-  advance();
+  exclusive(advance);
   fpsN++;
   if (now - fpsT > 1000) {
     $('fps').textContent = `${Math.round((fpsN * 1000) / (now - fpsT))} fps`;
@@ -123,7 +135,6 @@ function loop(now) {
     fpsN = 0;
   }
 }
-
 function present() {
   const [a, b] = panes;
   a.show(a.pixels);
@@ -179,44 +190,43 @@ async function restartScene() {
   await Promise.all(active().map((p) => p.start(state.scene)));
 }
 
-async function selectScene(i) {
-  state.scene = (i + EFFECTS.length) % EFFECTS.length;
-  renderChrome();
-  busy = true;
-  await restartScene();
-  busy = false;
-  if (!state.playing) await advance();
-}
+const selectScene = (i) =>
+  exclusive(async () => {
+    state.scene = (i + EFFECTS.length) % EFFECTS.length;
+    renderChrome();
+    await restartScene();
+    if (!state.playing) await advance();
+  });
 
-async function selectLang(pane, lang) {
-  if (pane === 0 && !lang) return;
-  if (lang && !available.has(lang)) return;
-  state.langs[pane] = lang;
-  const p = panes[pane];
-  p.el.hidden = !lang;
-  renderChrome();
-  if (!lang) {
-    p.worker?.terminate();
-    p.worker = null;
-    return;
-  }
-  busy = true;
-  await p.load(lang);
-  await p.start(state.scene);
-  // catch up to the frame on screen, so the switch keeps the same instant
-  if (state.n > 0) await p.render(state.n);
-  present();
-  busy = false;
-}
+const selectLang = (pane, lang) =>
+  exclusive(async () => {
+    if (pane === 0 && !lang) return;
+    if (lang && !available.has(lang)) return;
+    if (pane === 1 && lang === state.langs[0]) return;
+    state.langs[pane] = lang;
+    const p = panes[pane];
+    p.el.hidden = !lang;
+    if (!lang) {
+      p.worker?.terminate();
+      p.worker = null;
+      renderChrome();
+      return;
+    }
+    await p.load(lang);
+    await p.start(state.scene);
+    // catch up to the frame on screen, so the switch keeps the same instant
+    if (state.n > 0) await p.render(state.n);
+    renderChrome();
+    present();
+  });
 
-async function setResolution(value) {
-  [state.w, state.h] = value.split('x').map(Number);
-  busy = true;
-  for (const p of active()) await p.init();
-  await restartScene();
-  busy = false;
-  if (!state.playing) await advance();
-}
+const setResolution = (value) =>
+  exclusive(async () => {
+    [state.w, state.h] = value.split('x').map(Number);
+    for (const p of active()) await p.init();
+    await restartScene();
+    if (!state.playing) await advance();
+  });
 
 function togglePlay() {
   state.playing = !state.playing;
@@ -224,9 +234,9 @@ function togglePlay() {
   if (!state.playing) $('fps').textContent = 'paused';
 }
 
-async function step() {
+function step() {
   if (state.playing) togglePlay();
-  if (!busy) await advance();
+  if (!pending) exclusive(advance);
 }
 
 function toggleDiff(on = !state.diff) {
@@ -293,14 +303,22 @@ function renderCode() {
         : highlighter
           ? highlighter.codeToHtml(ex.code, { lang: l.hl, theme: 'github-dark-dimmed' })
           : `<pre>${escapeHtml(ex.code)}</pre>`;
+      const note = id === 'go' ? 'The reference every other port must match, pixel for pixel.' : NOTES[id]?.[eff.name];
       return `<article class="excerpt" style="--c:${l.color}">
         <header><b>${l.name}</b><span class="how">${l.how}${kb}</span>
           <span>${ex ? `${ex.file}:${ex.line}` : ''}</span></header>
+        ${note ? `<p class="note">${inline(note)}</p>` : ''}
         <div class="body">${body}</div>
       </article>`;
     })
     .join('');
 }
+
+// inline renders the little Markdown the notes use: `code` and **bold**
+const inline = (s) =>
+  escapeHtml(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
 
 const escapeHtml = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 
