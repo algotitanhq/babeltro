@@ -102,8 +102,8 @@ body.is-lab {
 }
 .question .logo {
   display: block;
-  width: min(560px, 86%);
-  margin: 0 auto 14px;
+  width: min(560px, 86%, 58vh);
+  margin: 0 auto 10px;
   image-rendering: pixelated;
   transform: rotate(-3deg);
   filter: drop-shadow(0 0 28px #ff4fa855);
@@ -126,7 +126,8 @@ body.is-lab {
   position: absolute;
   left: var(--x);
   top: var(--y);
-  width: clamp(150px, 15vw, 230px);
+  /* sized on the height too, so short windows do not stack cards on the question */
+  width: clamp(130px, min(15vw, 25vh), 230px);
   transform: translate(-50%, -50%) rotate(var(--r));
   padding: 7px 7px 9px;
   background: #17151f;

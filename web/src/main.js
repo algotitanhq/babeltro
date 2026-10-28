@@ -593,9 +593,9 @@ const escapeHtml = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;
 // Where each card sits around the question, in % of the page, and its tilt.
 // Hand-placed: a scatter, not a grid.
 const SCATTER = [
-  [22, 26, -5], [41, 20, 3], [60, 22, -2], [78, 28, 5],
-  [20, 54, 4], [80, 55, -4],
-  [25, 80, 3], [50, 82, -3], [75, 79, 2],
+  [21, 19, -5], [40, 12, 3], [61, 14, -2], [79, 21, 5],
+  [17, 52, 4], [83, 53, -4],
+  [24, 84, 3], [50, 88, -3], [76, 83, 2],
 ];
 
 let thumbs = null;
