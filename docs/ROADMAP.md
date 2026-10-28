@@ -7,11 +7,12 @@ whoever picks it up — a person or an agent.
 
 - **The reference** (`go/`): nine effects, a wasm build with the port
   contract (`spec/ABI.md`), and the native demo it started as.
-- **Ports**: C, Rust, Zig (wasm) and JavaScript. Eight of nine scenes
-  byte-identical to Go at every size tested; the finale differs only through
-  the language's name and the layout that follows its width.
+- **Ports**: eleven besides Go — TinyGo, C, C++, Rust, Zig, AssemblyScript,
+  hand-written WebAssembly, JavaScript, Python, Perl, SQL — under `ports/`.
+  Every effect a port implements is byte-identical to Go; the finale differs
+  only through the language's name and the layout that follows its width.
 - **Ladders**: the plasma, tunnel and Mandelbrot have optimisation steps
-  (`bb_step`), identical in every port, rung for rung.
+  (`bb_step`), identical in every port that has them, rung for rung.
 - **The lab** (`web/`): a home page of live cards, then one screen per
   effect — two languages side by side, pixel diff, ladder steps, each
   language's hot loop with a note, and a race across all languages.
@@ -35,9 +36,9 @@ whoever picks it up — a person or an agent.
 - **More ladders**: metaballs (per-ball offsets hoisted, then a bounding
   box per ball), fire (gather vs scatter), rotozoom (incremental stepping
   along a row instead of a multiply per pixel).
-- **More languages**: AssemblyScript (TypeScript-shaped wasm), Odin, Nim,
-  Swift (wasm), C++ (with and without the standard library), Python via
-  Pyodide as the "how slow is an interpreter" rung. Each one needs a
+- **More languages**: Odin, Nim, Swift (wasm), Lua, Ruby, Fortran, COBOL, a
+  GLSL fragment shader as the "cheating with the GPU" entry; the partial
+  ports (WAT, Perl, SQL) could cover more effects. Each one needs a
   build script writing `web/public/wasm/<lang>.wasm`, an entry in
   `web/src/content.js`, and a passing checker run.
 - **Parallelism chapter**: the native demo's band pool versus what each

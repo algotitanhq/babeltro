@@ -1,16 +1,73 @@
 # babeltro
 
+**How do you make a plasma in Perl? A tunnel in SQL? A fire in hand-written
+WebAssembly?**
+
 Nine classic demoscene effects — starfield, tunnel, plasma, rotozoom,
-metaballs, synthwave grid, fire, Mandelbrot, a logo card — written in several
-languages and run side by side in the browser. Babel for the languages,
-"-tro" for the intro.
+metaballs, synthwave grid, fire, Mandelbrot, a logo card — written in twelve
+languages and run live, side by side, in your browser. Every pixel is
+computed on the CPU, and every port draws **the same pixels** as the Go
+reference, bit for bit. Babel for the languages, "-tro" for the intro.
 
-The point is not which language wins. It is to see how each one approaches
-the same effect, and what it takes to make it produce **the same pixels**:
-float widths, fused multiply-adds, float-to-int conversion, bounds checks,
-evaluation order, the maths library.
+![The home page: the nine effects as live cards around the question "How do you make this effect in SQL?"](docs/screens/home.png)
 
-## The lab
+The point is not which language wins. It is what each one makes you write
+to produce the same image: float widths, fused multiply-adds, float-to-int
+conversion, bounds checks, evaluation order, the maths library — and, for
+some, the absence of a maths library.
+
+## What is in the lab
+
+- **Two languages side by side** on the same frames, with a pixel count and
+  a diff view: grey where the pixels match, magenta where they do not.
+- **Each language's hot loop** under the canvases, with a one-line note on
+  what that language does differently.
+- **Optimisation ladders** for the plasma, the tunnel and the Mandelbrot:
+  the naive version first, then one trick at a time, each rung comparable
+  with the last.
+- **A race**: every language on the current effect, timed, checked against
+  Go.
+
+## The languages
+
+| Language | Directory | How it gets into the browser | Effects |
+| --- | --- | --- | --- |
+| Go | `go/` | wasm, Go's own backend — **the reference** | 9 |
+| TinyGo | `ports/tinygo/` | the same Go files, compiled through LLVM | 9 |
+| C | `ports/c/` | clang + wasi-libc | 9 |
+| C++ | `ports/cpp/` | clang + libc++, C++23 | 9 |
+| Rust | `ports/rust/` | wasm32-unknown-unknown, no dependencies | 9 |
+| Zig | `ports/zig/` | wasm32-freestanding, comptime tables | 9 |
+| AssemblyScript | `ports/assemblyscript/` | asc, no imports | 9 |
+| WebAssembly, by hand | `ports/wat/` | hand-written WAT, its own sin/atan2/exp, 7.6 KB | 6 |
+| JavaScript | `ports/js/` | plain ES modules, `Math.fround` everywhere | 9 |
+| Python | `ports/python/` | CPython + NumPy in wasm (Pyodide) | 9 |
+| Perl | `ports/perl/` | Perl 5.42 in wasm (zeroperl) | 3 |
+| SQL | `ports/sql/` | SQLite in wasm (sql.js), one query per frame | 4 |
+
+Every effect a port implements is byte-identical to Go at every size and
+rung tested. The one exception is by design: the finale spells the
+language's name, and its layout follows the name's width.
+
+A few things the ports found:
+
+- **The timings measure compilers as much as languages.** The same Go code
+  is 1.5–3× faster built by TinyGo than by Go's own wasm backend, which keeps
+  every function resumable for goroutines. Native Go is faster still.
+- **SQLite has no float32**, so the SQL port emulates Go's float32 rounding
+  in pure SQL with Veltkamp's split. Without it, a few hundred pixels a
+  minute drift.
+- **WebAssembly has no `sin`.** The hand-written port computes its sine table
+  with a Cody-Waite reduction and a Taylor series: all 8193 entries match
+  Go's bit for bit.
+- **Perl matches too**, at a price: `unpack 'f', pack 'f'` after every
+  float32 operation, a third of its frame time.
+- **The Pythonic plasma is not a loop**: the NumPy version is 100–250× faster
+  than the plain-Python rungs.
+
+Each port's `NOTES.md` says what it does differently, effect by effect.
+
+## Running it
 
 ```sh
 cd web
@@ -19,38 +76,27 @@ npm install
 npm run dev
 ```
 
-One screen: pick an effect, a language, and a second language to compare
-with. The lab counts the differing pixels every frame and can paint them in
-magenta; under the canvases, each language's hot loop and a note on how that
-language does it differently. Every pane runs in its own worker.
+The ports need their toolchains (LLVM with wasi-libc, Rust, Zig, TinyGo,
+AssemblyScript, wabt); the Perl port fetches its interpreter with
+`ports/perl/fetch.sh`. Python, Perl and SQL bring their interpreters as
+wasm and need nothing to build.
 
 Keys: `Space` pause, `←`/`→` effect, `.` one frame, `R` restart, `D`
-differences, `1`–`4` compare with a language, `Shift`+`1`–`4` main language.
-
-## Ports
-
-| Directory | Language | How it runs in the browser | Pixels vs Go |
-| --- | --- | --- | --- |
-| `go/` | Go | wasm (`GOOS=wasip1`, reactor) — the reference | — |
-| `ports/c/` | C17 | wasm via clang + wasi-libc | identical ¹ |
-| `ports/rust/` | Rust | wasm32-unknown-unknown, no dependencies | identical ¹ |
-| `ports/zig/` | Zig | wasm32-freestanding, comptime tables | identical ¹ |
-| `ports/js/` | JavaScript | plain ES modules, no wasm | identical ¹ |
-| `goose/` | Goose | test bench, PLASMA only, native (see `goose/RESULTS.md`) | — |
-
-¹ Every scene at every size tested, except the finale, which spells the
-language's name: the logo's size follows the name's width, and the card is
-laid out around it.
-
-Each port has a `NOTES.md` with what it does differently, scene by scene.
-The contract every port follows, and how to add a language, is
-`spec/ABI.md`. `go/` also still builds the original native demo (window,
-HUD, worker pool): see `go/README.md`.
+differences, `Esc` home.
 
 ## Checking a port
 
 ```sh
-node tools/check.mjs c rust js                  # every scene against Go
-node tools/check.mjs --scene 2 --at 1,600 c     # one scene, chosen frames
-node tools/check.mjs --png /tmp/diff rust       # also write ref/port/diff PNGs
+node tools/check.mjs c rust js                    # every effect against Go
+node tools/check.mjs --scene 2 --step 1 python    # one rung of a ladder
+node tools/check.mjs --png /tmp/diff --size 160x90 perl
 ```
+
+The contract every port follows, and how to add a language, is
+[`spec/ABI.md`](spec/ABI.md). What could come next is in
+[`docs/ROADMAP.md`](docs/ROADMAP.md). `go/` also still builds the original
+native demo (a window, a HUD, a worker pool): see `go/README.md`.
+
+## Licence
+
+MIT — see [`LICENSE`](LICENSE).
