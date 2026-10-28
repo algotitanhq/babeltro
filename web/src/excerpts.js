@@ -6,7 +6,7 @@
 // Port sources live in ports/<lang>/; the language is the directory name.
 const portFiles = import.meta.glob(
   [
-    '../../ports/*/**/*.{c,h,cpp,hpp,rs,zig,js,mjs,ts,py,pl,pm,lua,rb,wat,sql,glsl,frag}',
+    '../../ports/*/**/*.{c,h,cpp,hpp,rs,zig,js,mjs,ts,py,pl,pm,lua,rb,wat,asm,sql,glsl,frag}',
     '!../../ports/*/**/node_modules/**',
     '!../../ports/*/target/**',
     '!../../ports/*/zig-out/**',

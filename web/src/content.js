@@ -143,6 +143,15 @@ export const LANGS = [
     scenes: [1, 2, 3, 4, 6, 7],
   },
   {
+    id: 'x86',
+    name: 'x86 assembly',
+    color: '#e86f8a',
+    hl: 'asm',
+    how: 'NASM-assembled x86 machine code, run by a tiny 386+SSE emulator compiled to wasm.',
+    scenes: [2, 6],
+    res: [320, 180], // emulated: 22 instructions per pixel, at 125 M a second
+  },
+  {
     id: 'js',
     name: 'JavaScript',
     color: '#f2d64b',

@@ -4,7 +4,7 @@
 WebAssembly?**
 
 Nine classic demoscene effects — starfield, tunnel, plasma, rotozoom,
-metaballs, synthwave grid, fire, Mandelbrot, a logo card — written in twelve
+metaballs, synthwave grid, fire, Mandelbrot, a logo card — written in thirteen
 languages and run live, side by side, in your browser. Every pixel is
 computed on the CPU, and every port draws **the same pixels** as the C
 reference, bit for bit. Babel for the languages, "-tro" for the intro.
@@ -41,6 +41,7 @@ some, the absence of a maths library.
 | Zig | `ports/zig/` | wasm32-freestanding, comptime tables | 9 |
 | AssemblyScript | `ports/assemblyscript/` | asc, no imports | 9 |
 | WebAssembly, by hand | `ports/wat/` | hand-written WAT, its own sin/atan2/exp, 7.6 KB | 6 |
+| x86 assembly | `ports/x86/` | NASM machine code on a tiny 386+SSE emulator in wasm | 2 |
 | JavaScript | `ports/js/` | plain ES modules, `Math.fround` everywhere | 9 |
 | Python | `ports/python/` | CPython + NumPy in wasm (Pyodide) | 9 |
 | Perl | `ports/perl/` | Perl 5.42 in wasm (zeroperl) | 3 |
@@ -58,6 +59,9 @@ A few things the ports found:
 - **SQLite has no float32**, so the SQL port emulates Go's float32 rounding
   in pure SQL with Veltkamp's split. Without it, a few hundred pixels a
   minute drift.
+- **x86 assembly runs on an emulator** written for the occasion: 22
+  emulated instructions per plasma pixel, SSE only, because x87's 80-bit
+  intermediates would break pixel identity.
 - **WebAssembly has no `sin`.** The hand-written port computes its sine table
   with a Cody-Waite reduction and a Taylor series: all 8193 entries match
   Go's bit for bit.

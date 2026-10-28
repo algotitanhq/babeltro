@@ -685,6 +685,7 @@ const GRAMMARS = {
   python: () => import('@shikijs/langs/python'),
   perl: () => import('@shikijs/langs/perl'),
   wasm: () => import('@shikijs/langs/wasm'),
+  asm: () => import('@shikijs/langs/asm'),
   sql: () => import('@shikijs/langs/sql'),
 };
 
