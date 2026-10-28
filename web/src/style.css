@@ -280,6 +280,8 @@ body.is-lab {
 .ladder button[aria-pressed='true'] { border-color: var(--accent); background: #ff4fa812; }
 .ladder button > b { font: 600 13px var(--mono); color: var(--accent); }
 .ladder .sname { display: block; font-weight: 600; font-size: 13px; }
+.ladder .sname em { font: 400 11px var(--mono); font-style: normal; color: var(--accent); margin-left: 4px; }
+.ladder .hint { margin: 0 0 8px; }
 .ladder .stext { display: none; font-size: 12px; color: var(--dim); margin-top: 2px; }
 .ladder button[aria-pressed='true'] .stext { display: block; }
 

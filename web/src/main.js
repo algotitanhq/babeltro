@@ -480,7 +480,7 @@ function renderChrome() {
     $('steps').innerHTML = st
       .map(
         (s, i) => `<li><button data-rung="${i + 1}" aria-pressed="${state.rung === i + 1}">
-          <b>${i + 1}</b><span><span class="sname">${s.name}</span><span class="stext">${s.text}</span></span>
+          <b>${i + 1}</b><span><span class="sname">${s.name}${i === st.length - 1 ? ' <em>what the demo runs</em>' : ''}</span><span class="stext">${s.text}</span></span>
         </button></li>`,
       )
       .join('');
