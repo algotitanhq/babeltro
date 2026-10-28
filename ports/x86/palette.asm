@@ -8,6 +8,10 @@ build_palettes:
         mov     esi, sunset_stops
         mov     ecx, 7
         call    build_ramp
+        mov     edi, ice
+        mov     esi, ice_stops
+        mov     ecx, 6
+        call    build_ramp
         mov     edi, ember
         mov     esi, ember_stops
         mov     ecx, 6
@@ -105,6 +109,13 @@ sunset_stops:
         dq 0.74, 1.00, 0.62, 0.15
         dq 0.88, 1.00, 0.93, 0.55
         dq 1.00, 1.00, 1.00, 0.96
+ice_stops:
+        dq 0.00, 0.00, 0.00, 0.03
+        dq 0.25, 0.00, 0.10, 0.30
+        dq 0.50, 0.00, 0.55, 0.85
+        dq 0.72, 0.35, 0.90, 1.00
+        dq 0.90, 0.80, 1.00, 1.00
+        dq 1.00, 1.00, 1.00, 1.00
 ember_stops:
         dq 0.00, 0.00, 0.00, 0.00
         dq 0.20, 0.25, 0.00, 0.00

@@ -207,11 +207,14 @@ static void sse(uint8_t op, int pre, uint32_t at)
     } else if (pre == 0x66) {
         switch (op) {
         case 0x2E: case 0x2F: comi(d_of(xmm[d]), d_of(get_xrm64())); return;
-        case 0x57: xmm[d] ^= get_xrm64(); return; // xorpd: low lane is all we keep
+        case 0x54: xmm[d] &= get_xrm64(); return; // andpd: low lane is all we keep
+        case 0x56: xmm[d] |= get_xrm64(); return; // orpd
+        case 0x57: xmm[d] ^= get_xrm64(); return; // xorpd
         }
     } else {
         switch (op) {
         case 0x2E: case 0x2F: comi(f_of((uint32_t)xmm[d]), f_of(get_xrm32())); return;
+        case 0x54: xmm[d] &= get_xrm64(); return; // andps
         case 0x57: xmm[d] ^= get_xrm64(); return; // xorps
         }
     }
@@ -265,6 +268,15 @@ static void run(uint32_t entry, uint32_t a, uint32_t d)
                 r[reg_field] = get_rm8();
             } else {
                 sse(op, pre, at);
+            }
+            continue;
+        }
+        if (pre == 0xF3 && op == 0xA5) { // rep movsd: the backdrop copy
+            while (r[ECX] && !dead) {
+                wr32(r[EDI], rd32(r[ESI]));
+                r[ESI] += 4;
+                r[EDI] += 4;
+                r[ECX]--;
             }
             continue;
         }
@@ -351,10 +363,12 @@ static void run(uint32_t entry, uint32_t a, uint32_t d)
             szp(v);
             break;
         }
-        case 0xF7: // test imm / div r/m32
+        case 0xF7: // test imm / neg / div r/m32
             modrm();
             if (reg_field == 0) {
                 alu(4, get_rm32(), f32());
+            } else if (reg_field == 3) { // neg: 0 - x, flags and all
+                set_rm32(alu(5, 0, get_rm32()));
             } else if (reg_field == 6) {
                 uint32_t dv = get_rm32();
                 uint64_t n = (uint64_t)r[EDX] << 32 | r[EAX];
@@ -369,12 +383,14 @@ static void run(uint32_t entry, uint32_t a, uint32_t d)
                 return;
             }
             break;
-        case 0xFF: // inc / dec r/m32, call r/m32
+        case 0xFF: // inc / dec / call / jmp r/m32
             modrm();
-            if (reg_field == 2) {
+            if (reg_field == 2) { // call r/m32
                 uint32_t to = get_rm32();
                 push(eip);
                 eip = to;
+            } else if (reg_field == 4) { // jmp r/m32: the jump tables
+                eip = get_rm32();
             } else if (reg_field <= 1) {
                 uint32_t a0 = get_rm32(), v = reg_field ? a0 - 1 : a0 + 1;
                 set_rm32(v);
