@@ -1,0 +1,15 @@
+[package]
+name = "babeltro"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "The babeltro effects in Rust, compiled to WebAssembly for the browser lab"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
