@@ -699,7 +699,7 @@ async function main() {
   );
   for (const id of modulePorts) available.add(id);
 
-  const count = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'][available.size] ?? available.size;
+  const count = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'][available.size] ?? available.size;
   $('tagline').textContent = `Nine demoscene effects · ${count} languages · the same pixels`;
   buildHome();
   await route();
