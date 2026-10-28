@@ -31,8 +31,6 @@ whoever picks it up — a person or an agent.
 
 ## Next, roughly in order
 
-- **Deploy** the lab (static: `web/dist` plus the wasm modules), e.g. on
-  Cloudflare like Uberblok. Needs the owner's go-ahead and account.
 - **More ladders**: metaballs (per-ball offsets hoisted, then a bounding
   box per ball), fire (gather vs scatter), rotozoom (incremental stepping
   along a row instead of a multiply per pixel).

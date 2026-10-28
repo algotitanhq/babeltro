@@ -9,6 +9,8 @@ languages and run live, side by side, in your browser. Every pixel is
 computed on the CPU, and every port draws **the same pixels** as the C
 reference, bit for bit. Babel for the languages, "-tro" for the intro.
 
+**Live: <https://babeltro.storagebits.workers.dev>**
+
 ![The home page: the nine effects as live cards around the question "How do you make this effect in SQL?"](docs/screens/home.png)
 
 The point is not which language wins. It is what each one makes you write
