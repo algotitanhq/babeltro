@@ -99,8 +99,9 @@ node tools/check.mjs --scene 2 --step 1 python    # one rung of a ladder
 node tools/check.mjs --png /tmp/diff --size 160x90 perl
 ```
 
-The contract every port follows, and how to add a language, is
-[`spec/ABI.md`](spec/ABI.md). What could come next is in
+How it was made: the prompts are in [`PROMPTS.md`](PROMPTS.md) and every
+decision is in [`DECISIONS.md`](DECISIONS.md). The contract every port
+follows, and how to add a language, is [`spec/ABI.md`](spec/ABI.md). What could come next is in
 [`docs/ROADMAP.md`](docs/ROADMAP.md). `go/` also still builds the original
 native demo (a window, a HUD, a worker pool): see `go/README.md`.
 
