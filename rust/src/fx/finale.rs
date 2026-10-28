@@ -163,7 +163,6 @@ impl Effect for Finale {
             row.fill(from_float(f64::from(r), f64::from(g), f64::from(b)));
         }
 
-        // @excerpt FINALE
         // --- background, pass 2: the pool of light, only where it reaches ---
         let ys = l.box_y.0.max(0) as usize..l.box_y.1.min(h as i32).max(0) as usize;
         let xs = l.box_x.0.max(0) as usize..l.box_x.1.min(w as i32).max(0) as usize;
@@ -193,7 +192,6 @@ impl Effect for Finale {
                 );
             }
         }
-        // @end
 
         // stars, twinkling slowly
         for (i, s) in self.stars.iter().enumerate() {
@@ -221,6 +219,7 @@ impl Effect for Finale {
             }
         }
 
+        // @excerpt FINALE
         // --- logo ---
         let scale = l.logo_scale;
         // the letters bounce off the floor line: offsets run from -scale/3
@@ -253,6 +252,7 @@ impl Effect for Finale {
             offs,
             true,
         );
+        // @end
 
         // --- subtitle with rules either side ---
         let sub_w = text_width(SUBTITLE, l.sub_scale);

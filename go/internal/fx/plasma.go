@@ -13,7 +13,6 @@ type Plasma struct {
 	w, h        int
 	rad         []float32
 	sx, sy, sxy []float32
-	sxy2        []float32
 	phase       float32
 	pal         *palette.Palette
 }
@@ -42,7 +41,6 @@ func (p *Plasma) Resize(w, h int) {
 	p.sx = make([]float32, w)
 	p.sy = make([]float32, h)
 	p.sxy = make([]float32, w+h)
-	p.sxy2 = make([]float32, w+h)
 }
 
 func (p *Plasma) Prepare(s State, w, h int) {
@@ -60,7 +58,6 @@ func (p *Plasma) Prepare(s State, w, h int) {
 	}
 	for i := 0; i < w+h; i++ {
 		p.sxy[i] = fmath.Sin(float32(i)*kx*0.85 + t*0.8)
-		p.sxy2[i] = fmath.Sin(float32(i)*kx*1.31 - t*0.6)
 	}
 	p.phase = t * 2.6
 }
