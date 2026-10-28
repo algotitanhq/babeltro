@@ -90,11 +90,19 @@ body.is-lab {
 .question {
   position: absolute;
   left: 50%;
-  top: 53%;
+  top: 52%;
   transform: translate(-50%, -50%);
   width: min(560px, 46vw);
   text-align: center;
   z-index: 1;
+}
+.question .logo {
+  display: block;
+  width: min(560px, 86%);
+  margin: 0 auto 14px;
+  image-rendering: pixelated;
+  transform: rotate(-3deg);
+  filter: drop-shadow(0 0 28px #ff4fa855);
 }
 .question h1 {
   margin: 0 0 14px;
@@ -102,7 +110,12 @@ body.is-lab {
   letter-spacing: -0.01em;
 }
 .question .in { white-space: nowrap; }
-.question b { transition: color 0.4s; }
+.question b { display: inline-block; transition: color 0.2s; }
+.question b.flip { animation: flip 0.25s ease-out; }
+@keyframes flip {
+  from { transform: translateY(-0.35em) rotateX(70deg); opacity: 0.2; }
+  to { transform: none; opacity: 1; }
+}
 .question p { margin: 0 auto; max-width: 440px; color: var(--dim); font-size: 15px; }
 
 .card {

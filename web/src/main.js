@@ -1,5 +1,6 @@
 import { EFFECTS, LANGS, HOME } from './content.js';
 import { EXCERPTS, NOTES } from './excerpts.js';
+import { startLogo } from './logo.js';
 
 const $ = (id) => document.getElementById(id);
 const wasmUrl = (lang) => `${import.meta.env.BASE_URL}wasm/${lang}.wasm`;
@@ -522,12 +523,18 @@ function buildHome() {
   const q = $('qlang');
   q.textContent = langs[0].name;
   q.style.color = langs[0].color;
+  // fast: the list will grow long, and the point is that it keeps going
   setInterval(() => {
     if (state.view !== 'home') return;
     k = (k + 1) % langs.length;
     q.textContent = langs[k].name;
     q.style.color = langs[k].color;
-  }, 1600);
+    q.classList.remove('flip');
+    void q.offsetWidth; // restart the animation
+    q.classList.add('flip');
+  }, 650);
+
+  startLogo($('logo'), 'BABELTRO', () => state.view === 'home');
 
   // the thumbnails come from the reference: at 256×144 even Go's slowest
   // scene costs about a millisecond, and the finale card then spells GO
