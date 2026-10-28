@@ -84,4 +84,4 @@ static void render(canvas *fb, const fx_state *s)
     // @end
 }
 
-const effect fx_fire = {"FIRE", start, render};
+const effect fx_fire = {"FIRE", start, render, NULL};

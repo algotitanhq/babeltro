@@ -148,4 +148,4 @@ static void render(canvas *fb, const fx_state *st)
     }
 }
 
-const effect fx_starfield = {"STARFIELD", start, render};
+const effect fx_starfield = {"STARFIELD", start, render, NULL};

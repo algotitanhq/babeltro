@@ -228,4 +228,4 @@ static void render(canvas *fb, const fx_state *s)
     // @end
 }
 
-const effect fx_finale = {"FINALE", start, render};
+const effect fx_finale = {"FINALE", start, render, NULL};

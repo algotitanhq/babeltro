@@ -31,6 +31,11 @@ typedef struct {
     const char *name;
     void (*start)(int w, int h);
     void (*render)(canvas *fb, const fx_state *s);
+    // set_step picks a rung of the scene's optimisation ladder, for the
+    // scenes that have one (NULL otherwise). 0 is the optimised default and
+    // start resets to it; steps 1..n are the rungs, n being that same
+    // default.
+    void (*set_step)(int n);
 } effect;
 
 extern const effect fx_starfield, fx_tunnel, fx_plasma, fx_rotozoom,

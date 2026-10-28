@@ -59,4 +59,4 @@ static void render(canvas *fb, const fx_state *s)
     // @end
 }
 
-const effect fx_metaballs = {"METABALLS", start, render};
+const effect fx_metaballs = {"METABALLS", start, render, NULL};

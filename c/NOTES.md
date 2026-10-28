@@ -15,7 +15,13 @@ ever one of each. Build: `scripts/build-c.sh`.
 - **TUNNEL**: the depth and angle tables have the same layout as the
   framebuffer, so the loop walks all three with one flat index. `restrict`
   tells the compiler the three never alias, which Go cannot express.
+- **TUNNEL/1**: `sqrtf` is correctly rounded, so it is Go's
+  `float32(math.Sqrt(...))` without the round trip through double.
 - **PLASMA**: Go's `sxy[y : y+w]` slice becomes the pointer `P.sxy + y`.
+- **PLASMA/1**: C has a float sine, `sinf`, so the naive version calls it
+  directly; Go has only `math.Sin` and rounds its double result to float32.
+  wasi-libc's `sinf` is not guaranteed correctly rounded, yet it changed no
+  pixel against Go's rung (640x360, 1280x720, 1920x1080, 333x211).
 - **ROTOZOOM**: the 1 MiB texture lives in static storage and is built once
   per module, not once per scene start. `math.Mod` is `fmod`. Go rounds the
   texture coordinates to float32 before using them in double maths; the

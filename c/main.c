@@ -1,6 +1,7 @@
 // The WebAssembly entry points every port exports (see spec/ABI.md):
 // bb_init allocates the framebuffer, bb_start begins a scene from a clean
-// state, bb_render draws one frame of it. There is no HUD, no scroller and no
+// state, bb_step optionally picks a rung of its optimisation ladder,
+// bb_render draws one frame of it. There is no HUD, no scroller and no
 // threads here: one thread, the effect's pixels and nothing else.
 #include <stdint.h>
 #include <stdlib.h>
@@ -41,6 +42,15 @@ EXPORT("bb_start") void bb_start(int32_t scene)
 {
     current = scenes[scene >= 0 && scene < SCENE_COUNT ? scene : SCENE_COUNT - 1];
     current->start(fb.w, fb.h);
+}
+
+// bb_step picks a rung of the scene's optimisation ladder, for the scenes
+// that have one; 0 is the optimised default. Called after bb_start, before
+// the first frame.
+EXPORT("bb_step") void bb_step(int32_t n)
+{
+    if (current->set_step)
+        current->set_step(n);
 }
 
 // bb_render draws frame n (n >= 1) of the current scene. Time is derived from

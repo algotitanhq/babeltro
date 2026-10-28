@@ -158,4 +158,4 @@ static void render(canvas *fb, const fx_state *s)
     }
 }
 
-const effect fx_grid = {"GRID", start, render};
+const effect fx_grid = {"GRID", start, render, NULL};
