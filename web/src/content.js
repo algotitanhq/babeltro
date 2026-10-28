@@ -123,9 +123,9 @@ export const LANGS = [
   {
     id: 'cpp',
     name: 'C++',
-    color: '#6fb3ff',
+    color: '#5be0a0',
     hl: 'cpp',
-    how: 'C++ → wasm with clang and libc++, no exceptions, no RTTI.',
+    how: 'C++23 → wasm with clang and libc++. Palettes and font are built at compile time.',
   },
   {
     id: 'assemblyscript',
@@ -152,7 +152,7 @@ export const LANGS = [
   {
     id: 'python',
     name: 'Python',
-    color: '#5fd38a',
+    color: '#5a9fd4',
     hl: 'python',
     how: 'CPython and NumPy compiled to wasm (Pyodide), running in the worker.',
     scenes: [1, 2, 7],
