@@ -594,7 +594,7 @@ function buildHome() {
     q.classList.remove('flip');
     void q.offsetWidth; // restart the animation
     q.classList.add('flip');
-  }, 200);
+  }, 400);
 
   startLogo($('logo'), 'BABELTRO', () => state.view === 'home');
 

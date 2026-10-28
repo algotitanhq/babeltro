@@ -1,0 +1,11 @@
+// The lab is static: web/dist plus the wasm modules, served as Worker assets
+// (free and unlimited, so a traffic spike is safe). No Worker script.
+// Private for now: Cloudflare Access sits in front of babeltro.*.workers.dev.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "babeltro",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./dist" },
+  "workers_dev": true,
+  "preview_urls": false
+}
